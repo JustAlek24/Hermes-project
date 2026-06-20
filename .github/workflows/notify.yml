@@ -110,15 +110,29 @@ jobs:
               }
             }'
       
-      # Дедлайны (Milestones)
+      # Дедлайны (Milestones) - УНИВЕРСАЛЬНАЯ ВЕРСИЯ
       - name: Дедлайны
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          MILESTONES=$(curl -s -H "Authorization: token $GH_TOKEN" \
-            "https://api.github.com/repos/JustAlek24/kazakVRN/milestones?state=open")
+          # Используем текущий репозиторий
+          REPO_FULL="${{ github.repository }}"
+          REPO_NAME="${{ github.event.repository.name }}"
           
+          echo "🔍 Проверяем милестоуны в репозитории: $REPO_FULL"
+          
+          # Получаем милестоуны
+          MILESTONES=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/${REPO_FULL}/milestones?state=open")
+          
+          # Проверяем, есть ли милестоуны
+          if [ -z "$MILESTONES" ] || [ "$MILESTONES" = "[]" ]; then
+            echo "📭 Нет открытых милестоунов в $REPO_NAME"
+            exit 0
+          fi
+          
+          # Обрабатываем каждый милестоун
           echo "$MILESTONES" | jq -c '.[] | select(.due_on != null)' | while read ms; do
             TITLE=$(echo "$ms" | jq -r '.title')
             URL=$(echo "$ms" | jq -r '.html_url')
@@ -127,7 +141,12 @@ jobs:
             NOW_SEC=$(date +%s)
             DAYS_LEFT=$(( ($DUE_SEC - $NOW_SEC) / 86400 ))
             
+            echo "📅 Милестоун: $TITLE, дней до дедлайна: $DAYS_LEFT"
+            
+            # Отправляем только если осталось 0-3 дня
             if [ $DAYS_LEFT -le 3 ] && [ $DAYS_LEFT -ge 0 ]; then
+              echo "📨 Отправляем уведомление о дедлайне: $TITLE"
+              
               curl -X POST \
                 -H "Authorization: token ${{ secrets.GH_PAT }}" \
                 -H "Accept: application/vnd.github.v3+json" \
@@ -136,7 +155,7 @@ jobs:
                   \"event_type\": \"send\",
                   \"client_payload\": {
                     \"event_type\": \"deadline\",
-                    \"repo_name\": \"${{ github.repository }}\",
+                    \"repo_name\": \"$REPO_NAME\",
                     \"deadline_info\": {
                       \"title\": \"$TITLE\",
                       \"url\": \"$URL\",
