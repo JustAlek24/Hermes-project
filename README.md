@@ -1,4 +1,3 @@
-<img width="1152" height="720" alt="Главный экран" src="https://github.com/user-attachments/assets/e748ed0f-aee0-48af-b046-61952bb786da" />
 # Hermes-project
 Проект приложения для передачи данных любого формата без использования постоянного сервера
 
