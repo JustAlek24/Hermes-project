@@ -18,6 +18,7 @@ def main():
     app = QGuiApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
+    engine.addImportPath(os.path.dirname(os.path.abspath(__file__)))
 
     qml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.qml")
     engine.load(QUrl.fromLocalFile(os.path.abspath(qml_path)))

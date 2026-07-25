@@ -1,20 +1,18 @@
 import QtQuick
-import QtQuick.Controls
+import Theme
 
 Rectangle {
     id: root
     property string text: ""
     property string icon: ""
     property bool collapsed: false
-    property color accentColor: '#9fa0fe'
-    property color textColor: '#00014c'
     signal clicked()
 
     anchors.left: parent.left
     anchors.right: parent.right
     height: 50
     radius: 8
-    color: mouseArea.containsMouse ? accentColor : "transparent"
+    color: mouseArea.containsMouse ? Theme.accentColor : "transparent"
 
     Behavior on color {
         ColorAnimation {
@@ -40,7 +38,7 @@ Rectangle {
         Text {
             text: root.text
             font.pixelSize: 16
-            color: root.textColor
+            color: Theme.textColor
             anchors.left: buttonIcon.right
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
