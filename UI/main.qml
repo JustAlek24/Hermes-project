@@ -6,6 +6,8 @@ ApplicationWindow {
     id: mainWindow
     width: 1200
     height: 800
+    minimumWidth: 800
+    minimumHeight: 400
     visible: true
     title: "Hermes файлообменник"
 
@@ -27,19 +29,11 @@ ApplicationWindow {
 
         Rectangle {
             id: leftPanel
-            width: leftPanelVisible ? 250 : 0
+            width: leftPanelVisible ? 250 : 70
             height: parent.height
-            x: leftPanelVisible ? 0 : -width
             color: panelColor
             z: 10
             clip: true
-
-            Behavior on x {
-                NumberAnimation {
-                    duration: 300
-                    easing.type: Easing.InOutQuad
-                }
-            }
 
             Behavior on width {
                 NumberAnimation {
@@ -48,67 +42,66 @@ ApplicationWindow {
                 }
             }
 
-            opacity: leftPanelVisible ? 1 : 0
+            opacity: 1
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 200
-                }
-            }
-
-            Column {
+            ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 20
-                spacing: 15
+                anchors.margins: 12
+                spacing: 10
 
-                Text {
-                    text: "Меню"
-                    font.pixelSize: 24
-                    font.bold: true
-                    color: textColor
+                Rectangle {
+                    height: 60
                     anchors.horizontalCenter: parent.horizontalCenter
-                    elide: Text.ElideRight
+                    
+                    Text {
+                        y: 10
+                        text: leftPanelVisible ? "Hermes project" : " "
+                        font.pixelSize: 24
+                        font.bold: true
+                        color: textColor
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        elide: Text.ElideRight
+                    }
                 }
 
                 SidePanelButton {
-                    width: parent.width
+                    Layout.fillWidth: true
+                    collapsed: !leftPanelVisible
                     text: "Входящие"
-                    icon: "icons/sent_icon.png"
+                    icon: "icons/incoming_icon.png"
                     onClicked: {
                         currentScreen = "main"
                     }
                 }
 
                 SidePanelButton {
-                    width: parent.width
+                    Layout.fillWidth: true
+                    collapsed: !leftPanelVisible
                     text: "Отправленные"
-                    icon: "icons/incoming_icon.png"
+                    icon: "icons/sent_icon.png"
                     onClicked: {
                         currentScreen = "sent"
                     }
                 }
 
                 SidePanelButton {
-                    width: parent.width
+                    Layout.fillWidth: true
+                    collapsed: !leftPanelVisible
                     text: "Пиры"
                     icon: "icons/peer_icon.png"
                     onClicked: {
                         currentScreen = "peers"
                     }
                 }
-            }
 
-            Column{
-                anchors.fill: parent
-                anchors.margins: 20
-                anchors.bottom: parent.bottom
-                spacing: 15
+                Item {
+                    Layout.fillHeight:true
+                }
 
                 SidePanelButton {
                     id: settingsButton
-                    anchors.bottom: parent.bottom
+                    collapsed: !leftPanelVisible
                     width: parent.width
-
                     text: "Настройки"
                     icon: "icons/settings_icon.png"
                     onClicked: {
@@ -117,13 +110,96 @@ ApplicationWindow {
                 }
 
                 SidePanelButton {
-                    anchors.bottom: settingsButton.top
-                    anchors.bottomMargin: 15
+                    collapsed: !leftPanelVisible
                     width: parent.width
                     text: "О программе"
                     icon: "icons/about_icon.png"
                     onClicked: {
                         currentScreen = "about"
+                    }
+                }
+            }
+        }
+
+        Column {
+            id: mainPanel
+            anchors.left: leftPanel.right
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            spacing: 0
+
+            Rectangle { //Верхняя панель
+                id: topPanel
+                width: parent.width
+                height: 80
+                color: primaryColor
+
+                Row {
+                    anchors.fill: parent
+                    spacing: 16
+                    leftPadding: 16
+                    rightPadding: 16
+
+                    Rectangle { //Кнопка меню
+                        width: 48
+                        height: 48
+                        anchors.verticalCenter: parent.verticalCenter
+                        radius: 8
+                        color: menuMouseArea.containsMouse ? Qt.rgba(1,1,1,0.2) : "transparent"
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "☰"
+                            font.pixelSize: 28
+                            color: textColor
+                        }
+                        MouseArea {
+                            id: menuMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: leftPanelVisible = !leftPanelVisible
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                    }
+
+                    Rectangle { // Кнопка отправить
+                        width: 220
+                        height: parent.height
+                        radius: 8
+                        color: sendMouseArea.containsMouse ? Qt.rgba(1,1,1,0.2) : "transparent"
+
+                        Row {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 15
+                            anchors.right: parent.right
+                            anchors.rightMargin: 15
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 10
+
+                            Image {
+                                source: "icons/send_icon.png"
+                                width: 24
+                                height: 24
+                                anchors.verticalCenter: parent.verticalCenter
+                                fillMode: Image.PreserveAspectFit
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Отправить"
+                                font.pixelSize: 22
+                                font.bold: true
+                                color: textColor
+                            }
+                        }
+
+                        MouseArea {
+                            id: sendMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: currentScreen = "send"
+                            cursorShape: Qt.PointingHandCursor
+                        }
                     }
                 }
             }
