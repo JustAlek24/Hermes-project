@@ -12,6 +12,16 @@ ApplicationWindow {
     visible: true
     title: "Hermes файлообменник"
 
+    readonly property int pageIncoming: 0
+    readonly property int pageViewIncoming: 1
+    readonly property int pageSent: 2
+    readonly property int pageSendFile: 3
+    readonly property int pagePeers: 4
+    readonly property int pageAddPeer: 5
+    readonly property int pageAbout: 6
+    readonly property int pageSettings: 7
+
+
     property bool leftPanelVisible: true
     property int currentScreen: 0
 
@@ -24,7 +34,7 @@ ApplicationWindow {
             id: leftPanel
             width: leftPanelVisible ? 250 : 70
             height: parent.height
-            color: Theme.panelColor
+            color: Theme.leftPanelColor
             z: 10
             clip: true
 
@@ -44,7 +54,7 @@ ApplicationWindow {
 
                 Rectangle { //Верхний текст
                     height: 60
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    Layout.alignment: Qt.AlignHCenter
                     
                     Text {
                         y: 10
@@ -63,7 +73,7 @@ ApplicationWindow {
                     text: "Входящие"
                     icon: "icons/incoming_icon.png"
                     onClicked: {
-                        currentScreen = 0
+                        currentScreen = pageIncoming
                     }
                 }
 
@@ -73,7 +83,7 @@ ApplicationWindow {
                     text: "Отправленные"
                     icon: "icons/sent_icon.png"
                     onClicked: {
-                        currentScreen = 1
+                        currentScreen = pageSent
                     }
                 }
 
@@ -83,7 +93,7 @@ ApplicationWindow {
                     text: "Пиры"
                     icon: "icons/peer_icon.png"
                     onClicked: {
-                        currentScreen = 3
+                        currentScreen = pagePeers
                     }
                 }
 
@@ -98,7 +108,7 @@ ApplicationWindow {
                     text: "Настройки"
                     icon: "icons/settings_icon.png"
                     onClicked: {
-                        currentScreen = 6
+                        currentScreen = pageSettings
                     }
                 }
 
@@ -108,38 +118,28 @@ ApplicationWindow {
                     text: "О программе"
                     icon: "icons/about_icon.png"
                     onClicked: {
-                        currentScreen = 5
+                        currentScreen = pageAbout
                     }
                 }
             }
         }
 
-        Column { //Главная панель
-            id: mainPanel
+        StackLayout { //Верхняя панель
             anchors.left: leftPanel.right
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
 
-            StackLayout { //Верхняя панель
-                anchors.fill: parent
+            currentIndex: currentScreen
 
-                currentIndex: currentScreen
-
-                IncomingPage {} //Входящие
-
-                SentPage {} //Отправленные
-
-                SendPage {} //Отправить
-                
-                PeersPage {} //Пиры
-
-                AddPeerPage {} // Добавить пир
-
-                AboutPage {} //О программе
-
-                SettingsPage {} //Настройки
-            }
+            IncomingPage {} //Входящие
+            ViewIncomingPage {} //Посмотреть входящее сообщение
+            SentPage {} //Отправленные
+            SendFilePage {} //Отправить
+            PeersPage {} //Пиры
+            AddPeerPage {} // Добавить пир
+            AboutPage {} //О программе
+            SettingsPage {} //Настройки
         }
     }
 }

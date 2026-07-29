@@ -1,7 +1,6 @@
 import QtQuick
 
 Rectangle {
-    anchors.centerIn: parent
 
     Text {
         anchors.centerIn: parent

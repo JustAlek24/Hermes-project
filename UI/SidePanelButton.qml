@@ -8,8 +8,6 @@ Rectangle {
     property bool collapsed: false
     signal clicked()
 
-    anchors.left: parent.left
-    anchors.right: parent.right
     height: 50
     radius: 8
     color: mouseArea.containsMouse ? Theme.accentColor : "transparent"
@@ -23,14 +21,13 @@ Rectangle {
     Row {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 10
+        padding: 10
 
         Image {
             id: buttonIcon
             source: root.icon
             width: 24
             height: 24
-            anchors.left: parent.left
-            anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             fillMode: Image.PreserveAspectFit
         }
@@ -39,8 +36,6 @@ Rectangle {
             text: root.text
             font.pixelSize: 16
             color: Theme.textColor
-            anchors.left: buttonIcon.right
-            anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             visible: !root.collapsed
         }
