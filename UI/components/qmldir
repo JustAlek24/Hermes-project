@@ -1,3 +1,4 @@
 module components
 
 SidePanelButton SidePanelButton.qml
+PeersButton PeersButton.qml

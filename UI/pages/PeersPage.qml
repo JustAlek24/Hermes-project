@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Theme
 import panels
+import components
 
 ColumnLayout {
     spacing: 0
@@ -15,18 +16,31 @@ ColumnLayout {
         Layout.fillWidth: true
         RowLayout { //Строка кнопок
             anchors.fill: parent
+            
             spacing: 20
 
-            Rectangle {
-                
+            PeersButton {
+            
+                Layout.fillWidth: true
+                Layout.leftMargin: 10
+                Layout.preferredWidth: 200
+                text: "Найти пир в сети Wi-Fi"
+                onClicked: app.find_peers()
             }
 
-            Rectangle {
-            
+            PeersButton {
+                Layout.preferredWidth: 200
+                Layout.fillWidth: true
+                text: "Проверить статус пиров"
+                onClicked: app.check_status()
             }
 
-            Rectangle {
-            
+            PeersButton {
+                Layout.fillWidth: true
+                Layout.rightMargin: 10
+                Layout.preferredWidth: 200
+                text: "Добавить пир вручную"
+                onClicked: app.add_peer()
             }
         }
     }

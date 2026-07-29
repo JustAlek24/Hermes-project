@@ -8,7 +8,7 @@ Rectangle { //Верхняя панель
     height: 80
     color: Theme.mainTopleftPanelColor
 
-    property string currentPage: currentPage
+    property string currentPage: ""
 
     RowLayout {
         anchors.fill: parent
