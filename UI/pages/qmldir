@@ -1,0 +1,10 @@
+module pages
+
+AboutPage AboutPage.qml
+AddPeerPage AddPeerPage.qml
+IncomingPage IncomingPage.qml
+PeersPage PeersPage.qml
+SendFilePage SendFilePage.qml
+SentPage SentPage.qml
+SettingsPage SettingsPage.qml
+ViewIncomingPage ViewIncomingPage.qml
