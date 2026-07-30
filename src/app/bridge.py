@@ -10,7 +10,7 @@ class AppBridge(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def new_peer_connected(self, name)
+    def new_peer_connected(self, name):
         self.new_peer.emit(name)
 
     @Slot()
