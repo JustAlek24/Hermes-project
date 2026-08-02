@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import Theme
 import panels
+import components
 
-ColumnLayout {
-    spacing: 0
+PageWithBottomPanel {
 
     HeaderPanel {currentPage: "Отправленные"}
 
@@ -111,12 +111,5 @@ ColumnLayout {
         ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
         ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
 
-    }   
-    
-    Rectangle { //Нижняя панель со статусом работы
-        id: bottomPanel
-        Layout.fillWidth: true
-        height: 100
-        color: Theme.leftPanelColor
     }
 }

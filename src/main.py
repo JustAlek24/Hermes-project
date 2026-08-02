@@ -26,6 +26,7 @@ def main():
 
     bridge = AppBridge()
     engine.rootContext().setContextProperty("app", bridge)
+    engine.rootContext().setContextProperty("peerStatus", bridge.peer_status)
 
     ui_dir = os.path.join(os.path.dirname(__file__), "..", "UI")
     engine.addImportPath(ui_dir)

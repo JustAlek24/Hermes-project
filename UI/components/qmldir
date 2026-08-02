@@ -2,3 +2,5 @@ module components
 
 SidePanelButton SidePanelButton.qml
 PeersButton PeersButton.qml
+Scrim Scrim.qml
+PageWithBottomPanel PageWithBottomPanel.qml

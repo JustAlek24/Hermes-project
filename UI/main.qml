@@ -36,6 +36,7 @@ ApplicationWindow {
         SideBar {id: leftPanel} // Левая панель
 
         StackLayout { // Правая панель
+            id: rightPanel
             anchors.left: leftPanel.right
             anchors.right: parent.right
             anchors.top: parent.top

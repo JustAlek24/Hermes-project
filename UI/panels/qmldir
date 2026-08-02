@@ -2,3 +2,4 @@ module panels
 
 SideBar SideBar.qml
 HeaderPanel HeaderPanel.qml
+BottomPanel BottomPanel.qml
