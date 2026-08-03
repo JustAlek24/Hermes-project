@@ -1,0 +1,2 @@
+module Theme
+singleton Theme Theme.qml
