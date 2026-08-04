@@ -1,1 +1,4 @@
-peer_status = {"online", "offline", "online", "online", "online", "offline", "offline", "offline"}
+peer_status = {
+    "online",
+    "offline",
+}

@@ -1,7 +1,9 @@
-import sys
 import os
+import sys
 
-_pyside6_dir = os.path.join(os.path.dirname(__file__), "..", ".venv", "Lib", "site-packages", "PySide6")
+_pyside6_dir = os.path.join(
+    os.path.dirname(__file__), "..", ".venv", "Lib", "site-packages", "PySide6"
+)
 _pyside6_dir = os.path.normpath(_pyside6_dir)
 if sys.platform == "win32" and os.path.isdir(_pyside6_dir):
     os.add_dll_directory(_pyside6_dir)
@@ -13,6 +15,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "."))
 
 from app.bridge import AppBridge
+
 
 def main():
     """Запуск UI"""
@@ -38,6 +41,7 @@ def main():
         sys.exit(-1)
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

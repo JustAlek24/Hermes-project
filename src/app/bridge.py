@@ -1,20 +1,20 @@
-from PySide6.QtCore import QObject, Slot, Signal, Property
+from PySide6.QtCore import Property, QObject, Signal, Slot
+
 from network import get_local_ip
 
-DEFAULT_PORT = 65432    # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - УДАЛИТЬ НАХУЙ !!!
+DEFAULT_PORT = 65432  # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - УДАЛИТЬ НАХУЙ !!!
+
 
 class AppBridge(QObject):
-
     ### Сигналы ###
-    new_peer = Signal(str)         # peer_id
-    status_changed = Signal(str, str)   # peer_id, status
+    new_peer = Signal(str)  # peer_id
+    status_changed = Signal(str, str)  # peer_id, status
     incoming_transfer = Signal(str, str)
     peerStatusChanged = Signal()
 
     ownAddressChanged = Signal()
     transfersChanged = Signal()
-    
-    
+
     # Инициализация класса
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -29,7 +29,7 @@ class AppBridge(QObject):
     def find_peers(self):
         print("Поиск пиров в сети...")
 
-    # Слот для кнопки запуска проверки известных пиров 
+    # Слот для кнопки запуска проверки известных пиров
     @Slot()
     def check_status(self):
         print("Проверка статуса пиров...")
@@ -52,7 +52,7 @@ class AppBridge(QObject):
     # Свойство для проверки статуса пира
     @Property(dict, notify=peerStatusChanged)
     def peer_status(self):
-        return self._peer_status    # dict[int, str] Словарь со статусом пиров
+        return self._peer_status  # dict[int, str] Словарь со статусом пиров
 
     # Свойство для отображения адреса пользователя
     @Property(str, notify=ownAddressChanged)
