@@ -1,4 +1,3 @@
-
 ERRORS = {
     "FILE_NOT_FOUND",
     "TRANSFER_FAILED",

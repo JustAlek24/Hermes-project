@@ -81,3 +81,40 @@ def wait_for_ack(
 
     pending_acks.pop(key, None)
     return False
+
+
+def handle_message(parsed, app):
+    msg_type = parsed.get("type")
+    peer_id = parsed.get("peer_id")
+
+    if msg_type == "HEARTBEAT":
+        app.update_peer_status(peer_id, "online")
+
+    elif msg_type == "ACK":
+        resolve_pending(
+            parsed["data"].get("ack_for"), peer_id, parsed["data"].get("chunk_id")
+        )
+
+    elif msg_type == "META":
+        # TODO: transfer_queue + Signal-уведомление GUI
+        pass
+
+    elif msg_type == "FILE_CHUNK":
+        # TODO: запись через transfer layer
+        pass
+
+    elif msg_type == "REJECT":
+        # TODO: отмена transfer, Signal-уведомление GUI
+        pass
+
+    elif msg_type == "ERROR":
+        # TODO: уведомление GUI
+        pass
+
+    elif msg_type == "SYNC_REQUEST":
+        # TODO: get_peers_since из БД + ответ SYNC_RESPONSE
+        pass
+
+    elif msg_type == "SYNC_RESPONSE":
+        # TODO: apply_sync в БД
+        pass
