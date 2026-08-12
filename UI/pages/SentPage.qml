@@ -87,29 +87,20 @@ PageWithBottomPanel {
         }
     }
 
-    ListModel {
-        id: incomingMessageModel
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
+    ListModel {id: sentgMessageModel}
 
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-
+    Connections {
+        target: app
+        onTransfersChanged: {
+            sentgMessageModel.clear()
+            for (var t of app.transfers) {
+                if (t.direction !== "out") continue
+                sentgMessageModel.append({
+                    peerID: t.peer_name, message: t.filename,
+                    date: "now", transferID: t.trensfer_id,
+                    status: t.status
+                })
+            }
+        }
     }
 }

@@ -11,7 +11,10 @@ Item {
     
     ColumnLayout {
         id: contentArea
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: bottomPanel.top
         spacing: 0
     }
 

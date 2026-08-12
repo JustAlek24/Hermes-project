@@ -25,7 +25,7 @@ class AppBridge(QObject):
         self.my_peer_id = uuid.uuid4().hex
         self._transfers = []
 
-    # Метод, запускающий сигнал о добавлении новой отправки/приёма файлов
+    # Метод, запускающий сигнал о добавлении новго приёма файла
     def add_incoming_transfer(self, meta, peer_id, peer_name):
         self._transfers.insert(0, {
             "transfer_id" : uuid.uuid4().hex,
