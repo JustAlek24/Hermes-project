@@ -1,5 +1,5 @@
+import asyncio
 import json
-import threading
 
 pending_acks = {}  # Заглушка, потом перенести в app
 KNOWN_TYPES = {
@@ -45,42 +45,71 @@ def parse_message(raw_string):
     return message
 
 
+class _Pending:
+    def __init__(self):
+        self.event = asyncio.Event()
+        self.rejected = False
+        self.error = False
+
+
 def register_pending(msg_type, peer_id, chunk_id=None):
     key = (peer_id, msg_type, chunk_id)
-    thread = threading.Event()
 
-    pending_acks[key] = thread
+    pending_acks[key] = _Pending()
 
     return key
 
 
 def resolve_pending(msg_type, peer_id, chunk_id=None):
-    event = pending_acks.get((peer_id, msg_type, chunk_id))
+    pending = pending_acks.get((peer_id, msg_type, chunk_id))
 
-    if event is not None:
-        event.set()
+    if pending is not None:
+        pending.event.set()
 
 
-def wait_for_ack(
+def reject_pending(peer_id):
+    pending = pending_acks.get((peer_id, "META", None))
+
+    if pending is not None:
+        pending.rejected = True
+        pending.event.set()
+
+
+def error_pending(peer_id):
+    pending = pending_acks.get((peer_id, "DONE", None))
+
+    if pending is not None:
+        pending.error = True
+        pending.event.set()
+
+
+async def wait_for_ack(
     msg_type, peer_id, chunk_id=None, timeout=10, max_retries=3, resend=None
 ):
     key = (peer_id, msg_type, chunk_id)
 
     for i in range(max_retries):
-        event = pending_acks.get(key)
+        pending = pending_acks.get(key)
 
-        if event is None:
-            return False
+        if pending is None:
+            return (False, None)
 
-        if event.wait(timeout):
+        try:
+            await asyncio.wait_for(pending.event.wait(), timeout)
+        except asyncio.TimeoutError:
+            if resend is not None:
+                resend()
+            continue
+        else:
             pending_acks.pop(key, None)
-            return True
-
-        if resend is not None:
-            resend()
+            if pending.rejected:
+                return (False, "REJECT")
+            if pending.error:
+                return (False, "ERROR")
+            return (True, None)
 
     pending_acks.pop(key, None)
-    return False
+    return (False, None)
 
 
 def handle_message(parsed, app):
@@ -105,11 +134,11 @@ def handle_message(parsed, app):
 
     elif msg_type == "REJECT":
         # TODO: отмена transfer, Signal-уведомление GUI
-        pass
+        reject_pending(peer_id)
 
     elif msg_type == "ERROR":
-        # TODO: уведомление GUI
-        pass
+        # TODO: Signal-уведомление GUI
+        error_pending(peer_id)
 
     elif msg_type == "SYNC_REQUEST":
         # TODO: get_peers_since из БД + ответ SYNC_RESPONSE

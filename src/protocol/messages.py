@@ -50,9 +50,8 @@ def create_ack(peer_id, ack_for, status="ok", chunk_id=None):
     return create_message("ACK", peer_id, data)
 
 
-def create_reject(peer_id, reason):
-    data = {"reason": reason}
-    return create_message("REJECT", peer_id, data)
+def create_reject(peer_id):
+    return create_message("REJECT", peer_id)
 
 
 def create_error(peer_id, code, message):

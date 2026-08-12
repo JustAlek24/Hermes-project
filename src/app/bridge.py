@@ -2,6 +2,8 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from network import get_local_ip
 
+import uuid
+
 DEFAULT_PORT = 65432  # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - УДАЛИТЬ НАХУЙ !!!
 
 
@@ -19,6 +21,7 @@ class AppBridge(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._peer_status = {}
+        self.my_peer_id = uuid.uuid4().hex
 
     # Метод, запускающий сигнал к QML о новом пире
     def new_peer_connected(self, name):

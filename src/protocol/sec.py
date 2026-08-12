@@ -58,8 +58,7 @@ def validate_message(parsed):
             return False, "chunk_id is incorrect"
 
     elif parsed.get("type") == "REJECT":
-        if not isinstance(data.get("reason"), str):
-            return False, "reason is not string"
+        pass
 
     elif parsed.get("type") == "ERROR":
         if data.get("code") not in ERRORS:
