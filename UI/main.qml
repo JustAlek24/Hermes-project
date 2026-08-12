@@ -27,6 +27,7 @@ ApplicationWindow {
 
     property bool leftPanelVisible: true
     property int currentScreen: 0
+    property string selectedTransferId: ""
 
     Rectangle { //Корень окна
         id: rootContainer
