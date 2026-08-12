@@ -76,11 +76,11 @@ def reject_pending(peer_id):
 
 
 def error_pending(peer_id):
-    pending = pending_acks.get((peer_id, "DONE", None))
+    for (pid, msg_type, chunk_id), pending in pending_acks.items():
 
-    if pending is not None:
-        pending.error = True
-        pending.event.set()
+        if pid == peer_id:
+            pending.error = True
+            pending.event.set()
 
 
 async def wait_for_ack(

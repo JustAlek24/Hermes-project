@@ -52,7 +52,9 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         )
         await connect.send_message(connection[1], chunk_msg)
         handler.register_pending("FILE_CHUNK", recipient_id, chunk_id=i)
-        ok, _ = await handler.wait_for_ack("FILE_CHUNK", recipient_id, chunk_id=i, timeout=10)
+        ok, _ = await handler.wait_for_ack(
+            "FILE_CHUNK", recipient_id, chunk_id=i, timeout=10
+        )
         if not ok:
             return (False, f"Чанк #{i} не доставлен")
         if progress_callback:
