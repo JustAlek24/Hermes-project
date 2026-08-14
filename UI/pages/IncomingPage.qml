@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Theme
 import panels
 import components
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
     HeaderPanel {currentPage: "Входящие"}
@@ -69,7 +70,7 @@ PageWithBottomPanel {
 
                 Text {
                     text: model.date
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: 150
                     Layout.rightMargin: 10
                 }
             }
@@ -106,7 +107,7 @@ PageWithBottomPanel {
                 if (t.direction !== "in") continue
                 incomingMessageModel.append({
                     peerID: t.peer_name, message: t.filename,
-                    date: t.timestamp, transferId: t.transfer_id,
+                    date: Utils.formatDate(t.timestamp), transferId: t.transfer_id,
                     status: t.status
                 })
             }

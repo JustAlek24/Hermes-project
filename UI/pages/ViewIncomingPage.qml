@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import panels
 import components
 import Theme
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
     id: root
@@ -59,8 +60,8 @@ PageWithBottomPanel {
             }
 
             InfoRow {label: "Файл: "; value: root.currentTransfer.filename}
-            InfoRow {label: "Размер: "; value: root.formatSize(root.currentTransfer.file_size)}
-            InfoRow {label: "Дата: "; value: root.formatDate(root.currentTransfer.timestamp)}
+            InfoRow {label: "Размер: "; value: Utils.formatSize(root.currentTransfer.file_size)}
+            InfoRow {label: "Дата: "; value: Utils.formatDate(root.currentTransfer.timestamp)}
             InfoRow {label: "SHA256: "; value: root.currentTransfer.sha256}
         }
     }
@@ -108,16 +109,6 @@ PageWithBottomPanel {
             peer_name: "-", filename: "-", file_size: "-",
             timestamp: "-", sha256: "-", status: "pending"
         })
-    }
-
-    function formatSize(bytes) {
-        if (bytes === null) return "-"
-        return (bytes / 1048576).toFixed(1) + " МБ"
-    }
-
-    function formatDate(sec) {
-        if (sec === null) return "-"
-        return new Date(sec * 1000).toLocaleString()
     }
 
     Connections {
