@@ -1,10 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-import Theme
 import panels
 
 Item {
-
+    id: root
     property bool statusBarExpanded: false
 
     default property alias content: contentArea.data
@@ -20,8 +19,8 @@ Item {
 
     Scrim {
         anchors.fill: parent
-        active: statusBarExpanded
-        onClosed: statusBarExpanded = false
+        active: root.statusBarExpanded
+        onClosed: root.statusBarExpanded = false
     }
 
     BottomPanel {
@@ -30,7 +29,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        expanded: statusBarExpanded
-        onExpandedSignal: statusBarExpanded = !statusBarExpanded
+        expanded: root.statusBarExpanded
+        onExpandedSignal: root.statusBarExpanded = !root.statusBarExpanded
     }
 }

@@ -1,17 +1,22 @@
 import QtQuick
-import QtQuick.Layouts
 import Theme
+import QtQuick.Layouts
 
 Rectangle {
     id: root
     property string text: ""
     property string icon: ""
+    property color normalColor: "transparent"
+    property color hoverColor: Theme.accentColor
     signal clicked()
 
     height: 50
     radius: 8
+
+    Layout.preferredWidth: 200
+    Layout.fillWidth: true
     
-    color: mouseArea.containsMouse ? Theme.accentColor : "transparent"
+    color: mouseArea.containsMouse ? root.hoverColor : root.normalColor
 
     Behavior on color {
         ColorAnimation {

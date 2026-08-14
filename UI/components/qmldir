@@ -1,6 +1,8 @@
 module components
 
 SidePanelButton SidePanelButton.qml
-PeersButton PeersButton.qml
+UniversalButton UniversalButton.qml
 Scrim Scrim.qml
 PageWithBottomPanel PageWithBottomPanel.qml
+StatusIndicator StatusIndicator.qml
+InfoRow InfoRow.qml

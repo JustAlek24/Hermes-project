@@ -18,26 +18,19 @@ PageWithBottomPanel {
             
             spacing: 20
 
-            PeersButton {
-            
-                Layout.fillWidth: true
+            UniversalButton {
                 Layout.leftMargin: 10
-                Layout.preferredWidth: 200
                 text: "Найти пир в сети Wi-Fi"
                 onClicked: app.find_peers()
             }
 
-            PeersButton {
-                Layout.preferredWidth: 200
-                Layout.fillWidth: true
+            UniversalButton {
                 text: "Проверить статус пиров"
                 onClicked: app.check_status()
             }
 
-            PeersButton {
-                Layout.fillWidth: true
+            UniversalButton {
                 Layout.rightMargin: 10
-                Layout.preferredWidth: 200
                 text: "Добавить пир вручную"
                 onClicked: app.add_peer()
             }

@@ -39,7 +39,7 @@ PageWithBottomPanel {
         clip: true
         
 
-        model: incomingMessageModel
+        model: sentMessageModel
 
         delegate: Rectangle {
 
@@ -87,12 +87,12 @@ PageWithBottomPanel {
         }
     }
 
-    ListModel {id: sentgMessageModel}
+    ListModel {id: sentMessageModel}
 
     Connections {
         target: app
-        onTransfersChanged: {
-            sentgMessageModel.clear()
+        function onTransfersChanged() {
+            sentMessageModel.clear()
             for (var t of app.transfers) {
                 if (t.direction !== "out") continue
                 sentgMessageModel.append({

@@ -100,19 +100,20 @@ PageWithBottomPanel {
 
     Connections {
         target: app
-        onTransfersChanged: {
+        function onTransfersChanged() {
             incomingMessageModel.clear()
             for (var t of app.transfers) {
                 if (t.direction !== "in") continue
                 incomingMessageModel.append({
                     peerID: t.peer_name, message: t.filename,
-                    date: "now", transferId: t.transfer_id,
+                    date: t.timestamp, transferId: t.transfer_id,
                     status: t.status
                 })
             }
         }
     }
 }
+
 //Rectangle { // Кнопка отправить
 //    id: rightButton
 //    width: 220

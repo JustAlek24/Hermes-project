@@ -11,7 +11,7 @@ ApplicationWindow {
     width: 1200
     height: 800
     minimumWidth: 900
-    minimumHeight: 400
+    minimumHeight: 600
     visible: true
     title: "Hermes файлообменник"
 
