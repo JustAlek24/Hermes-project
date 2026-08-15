@@ -11,7 +11,7 @@ ApplicationWindow {
     width: 1200
     height: 800
     minimumWidth: 900
-    minimumHeight: 400
+    minimumHeight: 600
     visible: true
     title: "Hermes файлообменник"
 
@@ -27,6 +27,7 @@ ApplicationWindow {
 
     property bool leftPanelVisible: true
     property int currentScreen: 0
+    property string selectedTransferId: ""
 
     Rectangle { //Корень окна
         id: rootContainer

@@ -45,15 +45,13 @@ Rectangle { //Верхняя панель
                 cursorShape: Qt.PointingHandCursor
             }
         }
-        Rectangle { // Заголовок страницы
-            Layout.fillWidth: true
-            Text {
-                anchors.centerIn: parent
-                text: currentPage
-                font.pixelSize: 22
-                font.bold: true
-                color: Theme.textColor 
-            }
-        }
+    }
+    Text {
+        anchors.verticalCenter: topPanel.verticalCenter
+        anchors.horizontalCenter: topPanel.horizontalCenter
+        text: currentPage
+        font.pixelSize: 22
+        font.bold: true
+        color: Theme.textColor 
     }
 }

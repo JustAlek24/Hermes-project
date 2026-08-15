@@ -1,6 +1,5 @@
 import QtQuick
-import Theme
-import QtQuick.Layouts
+
 
 Rectangle {
     id: scrim
@@ -9,8 +8,6 @@ Rectangle {
 
     anchors.fill: parent
     z: 1
-    //Layout.fillWidth: true
-    //Layout.fillHeight: true
     color: "#80000000"
     signal closed
     
@@ -24,6 +21,5 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: scrim.closed()
-        //onClicked: active = false
     }
 }

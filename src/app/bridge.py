@@ -4,6 +4,8 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from network import get_local_ip
 
+import time
+
 DEFAULT_PORT = 65432  # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - УДАЛИТЬ НАХУЙ !!!
 
 
@@ -11,7 +13,6 @@ class AppBridge(QObject):
     ### Сигналы ###
     new_peer = Signal(str)  # peer_id
     status_changed = Signal(str, str)  # peer_id, status
-    incoming_transfer = Signal(str, str)
     peerStatusChanged = Signal()
 
     ownAddressChanged = Signal()
@@ -22,6 +23,22 @@ class AppBridge(QObject):
         super().__init__(parent)
         self._peer_status = {}
         self.my_peer_id = uuid.uuid4().hex
+        self._transfers = []
+
+    # Метод, запускающий сигнал о добавлении новго приёма файла
+    def add_incoming_transfer(self, meta, peer_id, peer_name):
+        self._transfers.insert(0, {
+            "transfer_id" : uuid.uuid4().hex,
+            "direction" : "in", "peer_id" : peer_id, "peer_name" : peer_name,
+            "filename" : meta["filename"], "file_size" : meta["file_size"],
+            "sha256" : meta["sha256"], "chunks_count" : meta["chunks_count"],
+            "status" : "pending", "timestamp" : int(time.time())
+            })
+        self._transfers = list(self._transfers)
+        self.transfersChanged.emit()
+
+    def add_output_transfer(self, meta, peer_id, peer_name):
+        ...
 
     # Метод, запускающий сигнал к QML о новом пире
     def new_peer_connected(self, name):
@@ -41,6 +58,24 @@ class AppBridge(QObject):
     @Slot()
     def add_peer(self):
         print("Добавление пира...")
+
+    # Слот для кнопки принятия файлов 
+    @Slot(str)
+    def accept_transfer(self, transfer_id):
+        for t in self._transfers:
+            if t["transfer_id"] == transfer_id:
+                t["status"] = "accepted"
+                self.transfersChanged.emit()
+        print("Передача принята...")
+
+    # Слот для кнопки отказа от принятия файлов
+    @Slot(str)
+    def reject_transfer(self, transfer_id):
+        for t in self._transfers:
+            if t["transfer_id"] == transfer_id:
+                t["status"] = "rejected"
+                self.transfersChanged.emit()
+        print("Передача отклонена...")
 
     # Слот для поиска пиров
     @Slot(str)
@@ -70,7 +105,7 @@ class AppBridge(QObject):
     # Свойство для отображения данных по передаче
     @Property(list, notify=transfersChanged)
     def transfers(self):
-        return []
+        return self._transfers
 
     # Метод, запускающий сигнал для обновления статуса пира в интерфейсе
     def update_peer_status(self, peer_id, status):

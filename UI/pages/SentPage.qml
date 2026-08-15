@@ -3,9 +3,10 @@ import QtQuick.Layouts
 import Theme
 import panels
 import components
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
-
+    id: root
     HeaderPanel {currentPage: "Отправленные"}
 
     Rectangle { //Шапка таблицы
@@ -26,7 +27,7 @@ PageWithBottomPanel {
             }
             Text {
                 text: "Дата"
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 150
                 Layout.rightMargin: 10
             }
         }
@@ -39,14 +40,21 @@ PageWithBottomPanel {
         clip: true
         
 
-        model: incomingMessageModel
+        model: sentMessageModel
 
         delegate: Rectangle {
 
             width: ListView.view.width
             height: 50
-            //color: index % 2 === 0 ? "transparent" : Theme.tableColor
+            
             color: listArea.containsMouse ? Theme.accentColor : "transparent"
+            
+            Behavior on color {
+                ColorAnimation {
+                    duration: 300
+                }
+            }
+
             RowLayout {
                 anchors.fill: parent
 
@@ -63,7 +71,7 @@ PageWithBottomPanel {
 
                 Text {
                     text: model.date
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: 150
                     Layout.rightMargin: 10
                 }
             }
@@ -81,35 +89,29 @@ PageWithBottomPanel {
                 id: listArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: currentScreen = pageViewIncoming
+                onClicked: {
+                    selectedTransferId = model.transferId 
+                    currentScreen = pageSendFile
+                }
                 cursorShape: Qt.PointingHandCursor
             }
         }
     }
 
-    ListModel {
-        id: incomingMessageModel
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
+    ListModel {id: sentMessageModel}
 
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-        ListElement { peerID: "Абоба"; message: "Чуркистан"; date: "Негры"}
-
+    Connections {
+        target: app
+        function onTransfersChanged() {
+            sentMessageModel.clear()
+            for (var t of app.transfers) {
+                if (t.direction !== "out") continue
+                sentgMessageModel.append({
+                    peerID: t.peer_name, message: t.filename,
+                    date: Utils.formatDate(t.timestamp), transferID: t.trensfer_id,
+                    status: t.status
+                })
+            }
+        }
     }
 }

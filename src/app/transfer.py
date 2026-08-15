@@ -64,3 +64,6 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     if not ok:
         return (False, "Файл не подтверждён")
     return (True, None)
+
+async def recive_files(meta, connection, app, output_dir, progress_callback=None):
+    pass

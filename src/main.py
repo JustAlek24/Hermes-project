@@ -37,6 +37,10 @@ def main():
     qml_path = os.path.join(ui_dir, "main.qml")
     engine.load(QUrl.fromLocalFile(os.path.abspath(qml_path)))
 
+    meta = {"filename" : "Вонючие козявки", "file_size" : "12345678", "sha256" : "52", "chunks_count" : "13"}
+    bridge.add_incoming_transfer(meta, "1", "Абоба",)
+    #bridge.add
+    
     if not engine.rootObjects():
         sys.exit(-1)
 
