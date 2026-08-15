@@ -8,8 +8,13 @@ import "../utils.js" as Utils
 PageWithBottomPanel {
     id: root
     property var currentTransfer: ({
-        peer_name: "-", filename: "-", file_size: "-",
-        timestamp: "-", sha256: "-", status: "error"
+        transfer_id: "-",
+        peer_name: "-", 
+        filename: "-", 
+        file_size: "-",
+        timestamp: "-", 
+        sha256: "-", 
+        status: "error"
     })
 
 
@@ -85,7 +90,7 @@ PageWithBottomPanel {
                 Layout.leftMargin: 10
                 normalColor: Theme.buttonPrimary
                 hoverColor: Theme.buttonPrimaryHover 
-                onClicked: app.accept_transfer()
+                onClicked: app.accept_transfer(root.currentTransfer.transfer_id)
             }
 
             UniversalButton {
@@ -93,7 +98,14 @@ PageWithBottomPanel {
                 Layout.rightMargin: 10
                 normalColor: Theme.buttonSecondary
                 hoverColor: Theme.buttonSecondaryHover
-                onClicked: app.reject_transfer()
+                onClicked: app.reject_transfer(root.currentTransfer.transfer_id)
+            }
+        }
+
+        Behavior on height {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.OutCubic
             }
         }
     }
@@ -106,6 +118,7 @@ PageWithBottomPanel {
             }
         }
         root.currentTransfer = ({
+            transfer_id: "-",
             peer_name: "-", filename: "-", file_size: "-",
             timestamp: "-", sha256: "-", status: "pending"
         })
@@ -114,6 +127,13 @@ PageWithBottomPanel {
     Connections {
         target: mainWindow
         function onSelectedTransferIdChanged() {
+            root.updateTransfer()
+        }
+    }
+    
+    Connections {
+        target: app
+        function onTransfersChanged() {
             root.updateTransfer()
         }
     }

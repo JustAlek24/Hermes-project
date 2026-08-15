@@ -26,7 +26,7 @@ PageWithBottomPanel {
             }
             Text {
                 text: "Дата"
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 150
                 Layout.rightMargin: 10
             }
         }

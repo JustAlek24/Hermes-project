@@ -3,9 +3,10 @@ import QtQuick.Layouts
 import Theme
 import panels
 import components
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
-
+    id: root
     HeaderPanel {currentPage: "Отправленные"}
 
     Rectangle { //Шапка таблицы
@@ -26,7 +27,7 @@ PageWithBottomPanel {
             }
             Text {
                 text: "Дата"
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 150
                 Layout.rightMargin: 10
             }
         }
@@ -45,8 +46,15 @@ PageWithBottomPanel {
 
             width: ListView.view.width
             height: 50
-            //color: index % 2 === 0 ? "transparent" : Theme.tableColor
+            
             color: listArea.containsMouse ? Theme.accentColor : "transparent"
+            
+            Behavior on color {
+                ColorAnimation {
+                    duration: 300
+                }
+            }
+
             RowLayout {
                 anchors.fill: parent
 
@@ -63,7 +71,7 @@ PageWithBottomPanel {
 
                 Text {
                     text: model.date
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: 150
                     Layout.rightMargin: 10
                 }
             }
@@ -81,7 +89,10 @@ PageWithBottomPanel {
                 id: listArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: currentScreen = pageViewIncoming
+                onClicked: {
+                    selectedTransferId = model.transferId 
+                    currentScreen = pageSendFile
+                }
                 cursorShape: Qt.PointingHandCursor
             }
         }
@@ -97,7 +108,7 @@ PageWithBottomPanel {
                 if (t.direction !== "out") continue
                 sentgMessageModel.append({
                     peerID: t.peer_name, message: t.filename,
-                    date: "now", transferID: t.trensfer_id,
+                    date: Utils.formatDate(t.timestamp), transferID: t.trensfer_id,
                     status: t.status
                 })
             }

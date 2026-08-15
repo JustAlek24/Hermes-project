@@ -37,6 +37,9 @@ class AppBridge(QObject):
         self._transfers = list(self._transfers)
         self.transfersChanged.emit()
 
+    def add_output_transfer(self, meta, peer_id, peer_name):
+        ...
+
     # Метод, запускающий сигнал к QML о новом пире
     def new_peer_connected(self, name):
         self.new_peer.emit(name)
@@ -57,13 +60,21 @@ class AppBridge(QObject):
         print("Добавление пира...")
 
     # Слот для кнопки принятия файлов 
-    @Slot()
-    def accept_transfer(self):
+    @Slot(str)
+    def accept_transfer(self, transfer_id):
+        for t in self._transfers:
+            if t["transfer_id"] == transfer_id:
+                t["status"] = "accepted"
+                self.transfersChanged.emit()
         print("Передача принята...")
 
     # Слот для кнопки отказа от принятия файлов
-    @Slot()
-    def reject_transfer(self):
+    @Slot(str)
+    def reject_transfer(self, transfer_id):
+        for t in self._transfers:
+            if t["transfer_id"] == transfer_id:
+                t["status"] = "rejected"
+                self.transfersChanged.emit()
         print("Передача отклонена...")
 
     # Слот для поиска пиров
