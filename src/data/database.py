@@ -4,7 +4,6 @@ from pathlib import Path
 
 
 def init_db():
-
     BASE_DIR = Path(__file__).resolve().parent
     DB_PATH = BASE_DIR / "peers.db"
     connection = sqlite3.connect(DB_PATH)
@@ -27,8 +26,7 @@ def init_db():
 
 
 def add_peer(conn, peer_id, peer_name, ip, port):
-
-    if peer_name == None or peer_id == None or ip == None or port == None:
+    if peer_name is None or peer_id is None or ip is None or port is None:
         return False
     if int(port) < 0 or int(port) > 99999:
         return False
@@ -47,11 +45,11 @@ def add_peer(conn, peer_id, peer_name, ip, port):
 
 
 def get_peer(conn, peer_id):
-
     cur = conn.cursor()
     cur.execute("SELECT * FROM storage WHERE peer_id = ?", (peer_id,))
-    data = cur.fetchall()
-    data_dict = data[0]
+    data = cur.fetchone()
+    if not data:
+        return None
     words_for_dict = [
         "peer_id",
         "peer_name",
@@ -61,13 +59,12 @@ def get_peer(conn, peer_id):
         "updated_at",
         "version",
     ]
-    zip_dict = zip(words_for_dict, data_dict)
+    zip_dict = zip(words_for_dict, data)
     final_dict = dict(zip_dict)
     return final_dict
 
 
 def get_all_peers(conn):
-
     cur = conn.cursor()
     cur.execute("SELECT * FROM storage")
     all_users_data = cur.fetchall()
@@ -90,7 +87,6 @@ def get_all_peers(conn):
 
 
 def update_peer(conn, peer_id, **kwargs):
-
     cur = conn.cursor()
     allowed_fields = {"ip", "peer_name", "port"}
     filtered_kwargs = {
@@ -120,11 +116,12 @@ def update_peer(conn, peer_id, **kwargs):
     row = cur.fetchone()
     if row is None:
         return False
-    version = row[0] + 1
+    version = row[0]
     set_parts.append("version = ?")
     values.append(version)
 
     set_clause = ", ".join(set_parts)
+    print(set_clause)
     query = f"UPDATE storage SET {set_clause} WHERE peer_id = ?"
     values.append(peer_id)
     cur.execute(query, values)
@@ -133,11 +130,14 @@ def update_peer(conn, peer_id, **kwargs):
     new_values = cur.fetchone()
     if old_values == new_values:
         return False
+    version = version + 1
+    query_for_incr_version = """UPDATE storage SET version = ? WHERE peer_id = ?"""
+    cur.execute(query_for_incr_version, (version, peer_id))
+    conn.commit()
     return True
 
 
 def delete_peer(conn, peer_id):
-
     cur = conn.cursor()
     cur.execute("DELETE FROM storage WHERE peer_id = ?", (peer_id,))
     conn.commit()
@@ -163,6 +163,8 @@ def main():
     # print(get_peer(connect, "2"))
     # print(get_all_peers(connect))
     # print(delete_peer(connect, 2))
+    print(update_peer(connect, "2", ip="444.444.1.1", peername="Goluboy", port="40555"))
+    print(update_peer(connect, "2", ip="444.444.1.1", peername="Goluboy", port="40555"))
     print(update_peer(connect, "2", ip="444.444.1.1", peername="Goluboy", port="40555"))
 
 
