@@ -1,6 +1,9 @@
 import asyncio
 import json
 
+from data import database as db
+from protocol import messages
+
 pending_acks = {}  # Заглушка, потом перенести в app
 KNOWN_TYPES = {
     "HEARTBEAT",
@@ -124,7 +127,6 @@ def handle_message(parsed, app):
         )
 
     elif msg_type == "META":
-        # TODO: transfer_queue + Signal-уведомление GUI
         app.add_incoming_transfer(parsed.get("data"), peer_id)
 
     elif msg_type == "FILE_CHUNK":
@@ -133,19 +135,25 @@ def handle_message(parsed, app):
         app.receive_chunk(peer_id, chunk_id, content)
 
     elif msg_type == "REJECT":
-        # TODO: отмена transfer, Signal-уведомление GUI
         reject_pending(peer_id)
         app.update_transfer_status(peer_id, "rejected")
 
     elif msg_type == "ERROR":
-        # TODO: Signal-уведомление GUI
         error_pending(peer_id)
         app.update_transfer_status(peer_id, "error")
 
     elif msg_type == "SYNC_REQUEST":
-        # TODO: get_peers_since из БД + ответ SYNC_RESPONSE
-        pass
+        peers = db.get_all_peers(app.conn)
+        resp = messages.create_sync_response(app.my_peer_id, peers)
+        asyncio.ensure_future(app.send_sync_response(peer_id, resp))
 
     elif msg_type == "SYNC_RESPONSE":
-        # TODO: apply_sync в БД
-        pass
+        for p in parsed.get("data", {}).get("peers", []):
+            db.add_peer(
+                app.conn,
+                p["peer_id"],
+                p["peer_name"],
+                p["ip"],
+                p["port"],
+                p.get("version", 0),
+            )
