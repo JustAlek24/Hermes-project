@@ -1,9 +1,12 @@
+import asyncio
 import base64
 import os
 from hashlib import sha256
 
 from network import connection as connect
 from protocol import handler, messages
+
+_receive_buffers = {}  # peer_id → {"chunks": {}, "queue": asyncio.Queue, "meta": dict}
 
 
 def chunk_file(filepath, chunk_size=1048576):
@@ -32,6 +35,20 @@ def calculate_sha256(filepath, chunk_size=1048576):
                 break
             h.update(chunk)
     return h.hexdigest()
+
+
+def init_receive_buffer(peer_id, meta):
+    _receive_buffers[peer_id] = {
+        "chunks": {},
+        "queue": asyncio.Queue(),
+        "meta": meta,
+    }
+
+
+def put_chunk(peer_id, chunk_id, content):
+    buf = _receive_buffers.get(peer_id)
+    if buf:
+        buf["queue"].put_nowait((chunk_id, content))
 
 
 async def send_file(connection, filepath, recipient_id, app, progress_callback=None):
@@ -65,5 +82,46 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         return (False, "Файл не подтверждён")
     return (True, None)
 
-async def recive_files(meta, connection, app, output_dir, progress_callback=None):
-    pass
+
+async def recive_files(peer_id, connection, app, output_dir, progress_callback=None):
+    buf = _receive_buffers.get(peer_id)
+    if not buf:
+        return (False, "Буфер не инициализирован")
+
+    meta = buf["meta"]
+    queue = buf["queue"]
+    chunks_count = meta["chunks_count"]
+    expected_sha = meta["sha256"]
+    filename = meta["filename"]
+
+    chunks = {}
+    for i in range(chunks_count):
+        chunk_id, content = await queue.get()
+        chunks[chunk_id] = base64.b64decode(content)
+        if progress_callback:
+            progress_callback((i + 1) / chunks_count * 100)
+
+    output_path = os.path.join(output_dir, filename)
+    chunk_list = [chunks[i] for i in range(chunks_count)]
+    ok = assemble_file(chunk_list, output_path, expected_sha)
+
+    _receive_buffers.pop(peer_id, None)
+
+    if ok:
+        await connect.send_message(connection[1], messages.create_ack(app.my_peer_id, "DONE"))
+        app.update_transfer_status(peer_id, "completed")
+        return (True, output_path)
+    else:
+        await connect.send_message(connection[1], messages.create_error(app.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"))
+        app.update_transfer_status(peer_id, "error")
+        return (False, "SHA256 не совпадает")
+
+
+async def send_ack(my_peer_id, connection):
+    ack = messages.create_ack(my_peer_id, "META")
+    await connect.send_message(connection[1], ack)
+
+
+async def send_reject(my_peer_id, connection):
+    rej = messages.create_reject(my_peer_id)
+    await connect.send_message(connection[1], rej)

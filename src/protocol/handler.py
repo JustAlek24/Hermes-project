@@ -77,7 +77,6 @@ def reject_pending(peer_id):
 
 def error_pending(peer_id):
     for (pid, msg_type, chunk_id), pending in pending_acks.items():
-
         if pid == peer_id:
             pending.error = True
             pending.event.set()
@@ -126,19 +125,22 @@ def handle_message(parsed, app):
 
     elif msg_type == "META":
         # TODO: transfer_queue + Signal-уведомление GUI
-        pass
+        app.add_incoming_transfer(parsed.get("data"), peer_id)
 
     elif msg_type == "FILE_CHUNK":
-        # TODO: запись через transfer layer
-        pass
+        chunk_id = parsed["data"].get("chunk_id")
+        content = parsed["data"].get("content")
+        app.receive_chunk(peer_id, chunk_id, content)
 
     elif msg_type == "REJECT":
         # TODO: отмена transfer, Signal-уведомление GUI
         reject_pending(peer_id)
+        app.update_transfer_status(peer_id, "rejected")
 
     elif msg_type == "ERROR":
         # TODO: Signal-уведомление GUI
         error_pending(peer_id)
+        app.update_transfer_status(peer_id, "error")
 
     elif msg_type == "SYNC_REQUEST":
         # TODO: get_peers_since из БД + ответ SYNC_RESPONSE

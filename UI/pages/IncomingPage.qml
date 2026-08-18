@@ -16,7 +16,7 @@ PageWithBottomPanel {
         RowLayout {
             anchors.fill: parent
             Text {
-                text: "ID пира"
+                text: "Имя пира"
                 Layout.preferredWidth: 150
                 Layout.leftMargin: 10
             }
@@ -58,7 +58,7 @@ PageWithBottomPanel {
                 anchors.fill: parent
 
                 Text {
-                    text: model.peerID
+                    text: model.peerName
                     Layout.preferredWidth: 150
                     Layout.leftMargin: 10
                 }
@@ -106,7 +106,7 @@ PageWithBottomPanel {
             for (var t of app.transfers) {
                 if (t.direction !== "in") continue
                 incomingMessageModel.append({
-                    peerID: t.peer_name, message: t.filename,
+                    peerName: t.peer_name, message: t.filename,
                     date: Utils.formatDate(t.timestamp), transferId: t.transfer_id,
                     status: t.status
                 })

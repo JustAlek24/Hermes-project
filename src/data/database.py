@@ -1,6 +1,7 @@
 import sqlite3
-from pathlib import Path
 import time
+from pathlib import Path
+
 
 def init_db():
 
@@ -9,7 +10,7 @@ def init_db():
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
-    query_create = '''
+    query_create = """
     CREATE TABLE IF NOT EXISTS storage(
         peer_id TEXT PRIMARY KEY, 
         peer_name TEXT,
@@ -19,10 +20,11 @@ def init_db():
         updated_at INTEGER,
         version INTEGER
         );
-    '''
+    """
     cursor.execute(query_create)
     connection.commit()
     return connection
+
 
 def add_peer(conn, peer_id, peer_name, ip, port):
 
@@ -43,36 +45,57 @@ def add_peer(conn, peer_id, peer_name, ip, port):
     conn.commit()
     return True
 
+
 def get_peer(conn, peer_id):
 
     cur = conn.cursor()
-    cur.execute("SELECT * FROM storage WHERE peer_id = ?", (peer_id))
+    cur.execute("SELECT * FROM storage WHERE peer_id = ?", (peer_id,))
     data = cur.fetchall()
     data_dict = data[0]
-    words_for_dict = ["peer_id", "peer_name", "ip", "port", "last_seen", "updated_at", "version"]
+    words_for_dict = [
+        "peer_id",
+        "peer_name",
+        "ip",
+        "port",
+        "last_seen",
+        "updated_at",
+        "version",
+    ]
     zip_dict = zip(words_for_dict, data_dict)
     final_dict = dict(zip_dict)
     return final_dict
+
 
 def get_all_peers(conn):
 
     cur = conn.cursor()
     cur.execute("SELECT * FROM storage")
     all_users_data = cur.fetchall()
-    words_for_dict = ["peer_id", "peer_name", "ip", "port", "last_seen", "updated_at", "version"]
+    words_for_dict = [
+        "peer_id",
+        "peer_name",
+        "ip",
+        "port",
+        "last_seen",
+        "updated_at",
+        "version",
+    ]
     zip_list = []
     for data in all_users_data:
         zip_list.append(zip(words_for_dict, data))
-    final_dict = []    
+    final_dict = []
     for data_dict in zip_list:
         final_dict.append(dict(data_dict))
     return final_dict
+
 
 def update_peer(conn, peer_id, **kwargs):
 
     cur = conn.cursor()
     allowed_fields = {"ip", "peer_name", "port"}
-    filtered_kwargs = {key: value for key, value in kwargs.items() if key in allowed_fields}
+    filtered_kwargs = {
+        key: value for key, value in kwargs.items() if key in allowed_fields
+    }
     if not filtered_kwargs:
         return False
 
@@ -81,7 +104,7 @@ def update_peer(conn, peer_id, **kwargs):
     cur.execute(select_query, (peer_id,))
     old_values = cur.fetchone()
     if old_values is None:
-        return False 
+        return False
 
     set_parts = []
     values = []
@@ -112,6 +135,7 @@ def update_peer(conn, peer_id, **kwargs):
         return False
     return True
 
+
 def delete_peer(conn, peer_id):
 
     cur = conn.cursor()
@@ -121,6 +145,7 @@ def delete_peer(conn, peer_id):
     if cur.fetchone() == peer_id:
         return False
     return True
+
 
 def main():
     connect = init_db()
@@ -135,10 +160,11 @@ def main():
     print(add_peer(connect, "8", "Скотина бессовестная", "10.255.255.1", "1984"))
     print(add_peer(connect, "9", "Гандон", "192.168.100.1", "2000"))
     print(add_peer(connect, "10", "У меня идеи закончились", "172.25.0.1", "1488"))
-    #print(get_peer(connect, "2"))
-    #print(get_all_peers(connect))
-    #print(delete_peer(connect, 2))
+    # print(get_peer(connect, "2"))
+    # print(get_all_peers(connect))
+    # print(delete_peer(connect, 2))
     print(update_peer(connect, "2", ip="444.444.1.1", peername="Goluboy", port="40555"))
+
 
 if __name__ == "__main__":
     main()
