@@ -108,11 +108,18 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
     _receive_buffers.pop(peer_id, None)
 
     if ok:
-        await connect.send_message(connection[1], messages.create_ack(app.my_peer_id, "DONE"))
+        await connect.send_message(
+            connection[1], messages.create_ack(app.my_peer_id, "DONE")
+        )
         app.update_transfer_status(peer_id, "completed")
         return (True, output_path)
     else:
-        await connect.send_message(connection[1], messages.create_error(app.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"))
+        await connect.send_message(
+            connection[1],
+            messages.create_error(
+                app.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"
+            ),
+        )
         app.update_transfer_status(peer_id, "error")
         return (False, "SHA256 не совпадает")
 

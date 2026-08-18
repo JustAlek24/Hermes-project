@@ -105,7 +105,8 @@ class AppBridge(QObject):
 
     # Слот для отправки файла выбранному пиру
     @Slot(str, str)
-    def send_file(self, peer_id, file_path):
+    def send_file(self, app, connection, peer_id, file_path):
+        transfer.send_file(connection, file_path, peer_id, app)
         print(f"Отправка {file_path} пиру {peer_id}")
 
     # Свойство для проверки статуса пира
@@ -158,7 +159,9 @@ class AppBridge(QObject):
         if peer:
             connection = await connect.connect_to_peer(peer["ip"], peer["port"])
             if connection:
-                ack = messages.create_ack(self.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id)
+                ack = messages.create_ack(
+                    self.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
+                )
                 await connect.send_message(connection[1], ack)
 
     async def _receive_async(self, peer_id):
@@ -167,8 +170,17 @@ class AppBridge(QObject):
             connection = await connect.connect_to_peer(peer["ip"], peer["port"])
             if connection:
                 output_dir = os.path.expanduser("~/Downloads")
-                ok, result = await transfer.recive_files(peer_id, connection, self, output_dir)
+                ok, result = await transfer.recive_files(
+                    peer_id, connection, self, output_dir
+                )
                 print(f"Приём завершён: {result}")
+
+    async def send_sync_response(self, peer_id, resp):
+        peer = db.get_peer(self.conn, peer_id)
+        if peer:
+            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if connection:
+                await connect.send_message(connection[1], resp)
 
     def update_transfer_status(self, peer_id, status):
         for t in self._transfers:
