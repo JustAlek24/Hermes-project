@@ -1,5 +1,7 @@
+import asyncio
 import os
 import sys
+import threading
 
 _pyside6_dir = os.path.join(
     os.path.dirname(__file__), "..", ".venv", "Lib", "site-packages", "PySide6"
@@ -15,9 +17,26 @@ from PySide6.QtQml import QQmlApplicationEngine
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "."))
 
 from app.bridge import AppBridge
+from app.core import HermesApp
+from data import database as db
+
+
+def start_async_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+
+def start_network(loop):
+    pass
 
 
 def main():
+    conn = db.init_db()
+    asyncio_loop = asyncio.new_event_loop()
+    thread = threading.Thread(
+        target=start_async_loop, args=(asyncio_loop,), daemon=True
+    )
+    thread.start()
     """Запуск UI"""
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(_root)
@@ -27,7 +46,9 @@ def main():
     engine = QQmlApplicationEngine()
     engine.addImportPath(os.path.dirname(os.path.abspath(__file__)))
 
-    bridge = AppBridge()
+    hermes = HermesApp(conn)
+    bridge = AppBridge(hermes)
+    hermes._on_transfer_changed = bridge.transfersChanged.emit
     engine.rootContext().setContextProperty("app", bridge)
     engine.rootContext().setContextProperty("peerStatus", bridge.peer_status)
 
@@ -36,15 +57,6 @@ def main():
 
     qml_path = os.path.join(ui_dir, "main.qml")
     engine.load(QUrl.fromLocalFile(os.path.abspath(qml_path)))
-
-    meta = {
-        "filename": "Вонючие козявки",
-        "file_size": "12345678",
-        "sha256": "52",
-        "chunks_count": "13",
-    }
-    bridge.add_incoming_transfer(meta, "10")
-    # bridge.add
 
     if not engine.rootObjects():
         sys.exit(-1)

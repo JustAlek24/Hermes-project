@@ -4,7 +4,7 @@ import os
 from hashlib import sha256
 
 from network import connection as connect
-from protocol import handler, messages
+from protocol import messages
 
 _receive_buffers = {}  # peer_id → {"chunks": {}, "queue": asyncio.Queue, "meta": dict}
 
@@ -59,8 +59,8 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     chunks_count = len(chunks)
     meta = messages.create_meta(my_peer_id, filename, file_size, chunks_count, file_sha)
     await connect.send_message(connection[1], meta)
-    handler.register_pending("META", recipient_id)
-    ok, status = await handler.wait_for_ack("META", recipient_id, timeout=10)
+    app.register_pending("META", recipient_id)
+    ok, status = await app.wait_for_ack("META", recipient_id, timeout=10)
     if not ok:
         return (False, "Отказано" if status == "REJECT" else "Адресат не отвечает")
     for i in range(chunks_count):
@@ -68,16 +68,16 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
             my_peer_id, i, base64.b64encode(chunks[i]).decode()
         )
         await connect.send_message(connection[1], chunk_msg)
-        handler.register_pending("FILE_CHUNK", recipient_id, chunk_id=i)
-        ok, _ = await handler.wait_for_ack(
+        app.register_pending("FILE_CHUNK", recipient_id, chunk_id=i)
+        ok, _ = await app.wait_for_ack(
             "FILE_CHUNK", recipient_id, chunk_id=i, timeout=10
         )
         if not ok:
             return (False, f"Чанк #{i} не доставлен")
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
-    handler.register_pending("DONE", recipient_id)
-    ok, _ = await handler.wait_for_ack("DONE", recipient_id)
+    app.register_pending("DONE", recipient_id)
+    ok, _ = await app.wait_for_ack("DONE", recipient_id)
     if not ok:
         return (False, "Файл не подтверждён")
     return (True, None)
