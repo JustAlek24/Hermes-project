@@ -20,14 +20,16 @@ ApplicationWindow {
     readonly property int pageSent: 2
     readonly property int pageSendFile: 3
     readonly property int pagePeers: 4
-    readonly property int pageAddPeer: 5
-    readonly property int pageAbout: 6
-    readonly property int pageSettings: 7
+    readonly property int pageAboutPeer: 5
+    readonly property int pageAddPeer: 6
+    readonly property int pageAbout: 7
+    readonly property int pageSettings: 8
 
 
     property bool leftPanelVisible: true
     property int currentScreen: 0
     property string selectedTransferId: ""
+    property string selectedPeer: ""
 
     Rectangle { //Корень окна
         id: rootContainer
@@ -50,6 +52,7 @@ ApplicationWindow {
             SentPage {} //Отправленные
             SendFilePage {} //Отправить
             PeersPage {} //Пиры
+            AboutPeerPage {} //Страница пира
             AddPeerPage {} // Добавить пир
             AboutPage {} //О программе
             SettingsPage {} //Настройки

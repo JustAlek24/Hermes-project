@@ -8,3 +8,4 @@ SendFilePage SendFilePage.qml
 SentPage SentPage.qml
 SettingsPage SettingsPage.qml
 ViewIncomingPage ViewIncomingPage.qml
+AboutPeerPage AboutPeerPage.qml

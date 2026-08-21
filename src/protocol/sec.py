@@ -4,6 +4,7 @@ ERRORS = {
     "TIMEOUT",
     "INVALID_JSON",
     "INVALID_PEER",
+    "CHECKSUM_MISMATCH",
 }
 
 

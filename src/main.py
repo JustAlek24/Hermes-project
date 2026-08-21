@@ -46,11 +46,14 @@ def main():
     engine = QQmlApplicationEngine()
     engine.addImportPath(os.path.dirname(os.path.abspath(__file__)))
 
-    hermes = HermesApp(conn)
-    bridge = AppBridge(hermes)
+    hermes = HermesApp(conn, loop=asyncio_loop)
+    bridge = AppBridge(hermes, loop=asyncio_loop)
     hermes._on_transfer_changed = bridge.transfersChanged.emit
+    hermes._on_chunk_ack = lambda pid, cid: asyncio.run_coroutine_threadsafe(
+        bridge._send_chunk_ack_async(pid, cid), asyncio_loop
+    )
+    hermes._on_sync_response = bridge.send_sync_response
     engine.rootContext().setContextProperty("app", bridge)
-    engine.rootContext().setContextProperty("peerStatus", bridge.peer_status)
 
     ui_dir = os.path.join(os.path.dirname(__file__), "..", "UI")
     engine.addImportPath(ui_dir)

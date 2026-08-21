@@ -142,7 +142,7 @@ def delete_peer(conn, peer_id):
     cur.execute("DELETE FROM storage WHERE peer_id = ?", (peer_id,))
     conn.commit()
     cur.execute("SELECT peer_id FROM storage WHERE peer_id = ?", (peer_id,))
-    return cur.fetchone() == peer_id
+    return cur.fetchone() is None
 
 
 def main():
