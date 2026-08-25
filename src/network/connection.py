@@ -2,7 +2,11 @@ import asyncio
 import json
 import logging
 
+<<<<<<< HEAD
 from protocol.handler import handle_message
+=======
+from src.protocol import handle_message
+>>>>>>> 8e0d8dd (Создал update_last_seen и немного изменил логику проверок)
 
 _connections = {}
 _connection_lock = asyncio.Lock()
