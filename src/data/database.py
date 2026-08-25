@@ -156,7 +156,7 @@ def main():
     print(add_peer(connect, "6", "Очкошник", "192.168.31.1", "4242"))
     print(add_peer(connect, "7", "Бездарность", "172.18.0.1", "5555"))
     print(add_peer(connect, "8", "Скотина бессовестная", "10.255.255.1", "1984"))
-    print(add_peer(connect, "9", "Гандон", "192.168.100.1", "2000"))
+    print(add_peer(connect, "9", "Гандон", "192.168.100.2", "2000"))
     print(add_peer(connect, "10", "У меня идеи закончились", "172.25.0.1", "1488"))
     # print(get_peer(connect, "2"))
     # print(get_all_peers(connect))
