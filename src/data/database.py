@@ -145,6 +145,15 @@ def delete_peer(conn, peer_id):
     return cur.fetchone() == peer_id
 
 
+def update_last_seen(conn, peer_id):
+    cur = conn.cursor()
+    last_seen = time.time()
+    cur.execute(
+        "UPDATE storage SET last_seen = ? WHERE peer_id = ?", (last_seen, peer_id)
+    )
+    conn.commit()
+
+
 def main():
     connect = init_db()
     print(add_peer(connect, "2", "Козявка", "124.124.4.4", "44555"))
