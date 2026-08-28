@@ -15,8 +15,10 @@ Rectangle {
 
     Layout.preferredWidth: 200
     Layout.fillWidth: true
-    
-    color: mouseArea.containsMouse ? root.hoverColor : root.normalColor
+
+    opacity: root.enabled ? 1.0 : 0.4
+
+    color: root.enabled && mouseArea.containsMouse ? root.hoverColor : root.normalColor
 
     Behavior on color {
         ColorAnimation {
@@ -26,7 +28,7 @@ Rectangle {
 
     Row {
         anchors.centerIn: parent
-    
+
         spacing: 10
         padding: 10
 
@@ -40,7 +42,12 @@ Rectangle {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
-        onClicked: root.clicked()
+        hoverEnabled: root.enabled
+        enabled: root.enabled
+        onClicked: {
+            if (root.enabled)
+                root.clicked()
+        }
+        cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     }
 }

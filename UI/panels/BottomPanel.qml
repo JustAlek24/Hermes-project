@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Theme
 
-Rectangle { //Нижняя панель со статусом работы
+Rectangle {
     id: bottomPanel
 
     property bool expanded: false    
@@ -31,25 +31,29 @@ Rectangle { //Нижняя панель со статусом работы
                 Layout.alignment: Qt.AlignVCenter
                 text: "Внутренний IP: " + app.own_address
                 font.pixelSize: 14
-                //color: Theme.textColor
             }
             Text {
                 Layout.leftMargin: 20
                 Layout.alignment: Qt.AlignVCenter
-                //Layout.fillHeight: true
                 
                 text: "Онлайн: " + app.online_count
-                //color: Theme.textColor
                 font.pixelSize: 14
 
             }
 
             ProgressBar {
+                id: activeProgress
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 Layout.rightMargin: 15
                 visible: app.transfers.length > 0
-                value: 0.5 //app.transfers
+                value: {
+                    var progress = app.transfer_progress
+                    var keys = Object.keys(progress)
+                    if (keys.length > 0)
+                        return progress[keys[0]] / 100
+                    return 0
+                }
             }
             Text {
                 Layout.fillWidth: true

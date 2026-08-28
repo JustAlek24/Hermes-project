@@ -108,7 +108,7 @@ PageWithBottomPanel {
                 if (t.direction !== "out") continue
                 sentMessageModel.append({
                     peerName: t.peer_name, message: t.filename,
-                    date: Utils.formatDate(t.timestamp), transferID: t.transfer_id,
+                    date: Utils.formatDate(t.timestamp), transferId: t.transfer_id,
                     status: t.status
                 })
             }

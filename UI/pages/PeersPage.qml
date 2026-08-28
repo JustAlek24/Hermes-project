@@ -3,18 +3,17 @@ import QtQuick.Layouts
 import Theme
 import components
 import panels
-import "../utils.js" as Utils
 
 PageWithBottomPanel {
 
     HeaderPanel {currentPage: "Известные пиры"}
 
-    Rectangle { //Панель кнопок для работы с пирами
+    Rectangle {
         id: peersButtons
         height: 60
         color: Theme.mainTopleftPanelColor
         Layout.fillWidth: true
-        RowLayout { //Строка кнопок
+        RowLayout {
             anchors.fill: parent
             
             spacing: 20
@@ -38,7 +37,7 @@ PageWithBottomPanel {
         }
     }
 
-    Rectangle { //Шапка таблицы
+    Rectangle {
         id: tableHead
         height: 40
         Layout.fillWidth: true
@@ -46,33 +45,31 @@ PageWithBottomPanel {
         RowLayout {
             anchors.fill: parent
             Text {
-                text: "ID пира"
+                text: "Имя пира"
                 Layout.preferredWidth: 150
                 Layout.leftMargin: 10
             }
             Text {
-                text: "Был в сети"
+                text: "IP"
                 Layout.fillWidth: true
             }
             Text {
-                text: "Статус"
-                Layout.preferredWidth: 100
+                text: "Порт"
+                Layout.preferredWidth: 80
                 Layout.rightMargin: 10
             }
         }
     }
 
-    ListView { //Список пиров
+    ListView {
         id: peersList
         Layout.fillHeight: true
         Layout.fillWidth: true
         clip: true
-        
 
         model: peersListModel
 
         delegate: Rectangle {
-
             width: ListView.view.width
             height: 50
             color: listArea.containsMouse ? Theme.accentColor : "transparent"
@@ -80,19 +77,19 @@ PageWithBottomPanel {
                 anchors.fill: parent
 
                 Text {
-                    text: model.peerID
+                    text: model.peerName
                     Layout.preferredWidth: 150
                     Layout.leftMargin: 10
                 }
 
                 Text {
-                    text: model.lastSeen
+                    text: model.peerIP
                     Layout.fillWidth: true
                 }
 
                 Text {
-                    text: model.status
-                    Layout.preferredWidth: 100
+                    text: model.peerPort
+                    Layout.preferredWidth: 80
                     Layout.rightMargin: 10
                 }
             }
@@ -125,14 +122,24 @@ PageWithBottomPanel {
 
     Connections {
         target: app
-        function onNew_peer() {
+        function onPeersChanged() {
             peersListModel.clear()
-            for (var p of app.transfers) {
+            for (var p of app.peers) {
                 peersListModel.append({
-                    peerID: p.peer_id, lastSeen: Utils.formatDate(p.timestamp),
-                    status: p.status
+                    peerID: p.peer_id, peerName: p.peer_name,
+                    peerIP: p.ip, peerPort: p.port
                 })
             }
+        }
+    }
+
+    Component.onCompleted: {
+        peersListModel.clear()
+        for (var p of app.peers) {
+            peersListModel.append({
+                peerID: p.peer_id, peerName: p.peer_name,
+                peerIP: p.ip, peerPort: p.port
+            })
         }
     }
 }

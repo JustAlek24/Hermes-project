@@ -92,22 +92,22 @@ class HermesApp:
     def add_incoming_transfer(self, meta, peer_id):
         peer = db.get_peer(self.db, peer_id)
         peer_name = peer["peer_name"] if peer else peer_id
-        self._transfers.insert(
-            0,
-            {
-                "transfer_id": uuid.uuid4().hex,
-                "direction": "in",
-                "peer_id": peer_id,
-                "peer_name": peer_name,
-                "filename": meta["filename"],
-                "file_size": meta["file_size"],
-                "sha256": meta["sha256"],
-                "chunks_count": meta["chunks_count"],
-                "status": "pending",
-                "timestamp": int(time.time()),
-            },
-        )
+        transfer_id = uuid.uuid4().hex
+        transfer_record = {
+            "transfer_id": transfer_id,
+            "direction": "in",
+            "peer_id": peer_id,
+            "peer_name": peer_name,
+            "filename": meta["filename"],
+            "file_size": meta["file_size"],
+            "sha256": meta["sha256"],
+            "chunks_count": meta["chunks_count"],
+            "status": "pending",
+            "timestamp": int(time.time()),
+        }
+        self._transfers.insert(0, transfer_record)
         self._transfers = list(self._transfers)
+        transfer.init_receive_buffer(peer_id, transfer_record)
         if self._on_transfer_changed:
             self._on_transfer_changed()
 
