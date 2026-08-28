@@ -24,6 +24,7 @@ class AppBridge(QObject):
     peerNamesChanged = Signal()
     peersChanged = Signal()
     transferProgressChanged = Signal()
+    incomingTransfer = Signal(str)
 
     def __init__(self, core, loop=None, parent=None):
         super().__init__(parent)

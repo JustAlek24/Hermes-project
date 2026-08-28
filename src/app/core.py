@@ -26,6 +26,7 @@ class HermesApp:
         self.tcp_connections = []
         self._on_transfer_changed = on_transfer_changed
         self._on_chunk_ack = on_chunk_ack
+        self._on_new_incoming = None
         self._on_sync_response = None
 
     def parse_message(self, raw_string):
@@ -108,6 +109,8 @@ class HermesApp:
         self._transfers.insert(0, transfer_record)
         self._transfers = list(self._transfers)
         transfer.init_receive_buffer(peer_id, transfer_record)
+        if self._on_new_incoming:
+            self._on_new_incoming(transfer_record)
         if self._on_transfer_changed:
             self._on_transfer_changed()
 

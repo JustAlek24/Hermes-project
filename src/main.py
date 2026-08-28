@@ -10,7 +10,7 @@ _pyside6_dir = os.path.normpath(_pyside6_dir)
 if sys.platform == "win32" and os.path.isdir(_pyside6_dir):
     os.add_dll_directory(_pyside6_dir)
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -82,6 +82,32 @@ def start_network(loop):
     pass
 
 
+# Флаг демо-данных для отладки GUI. Поставить False для релиза.
+DEMO_DATA = True
+
+
+def seed_demo_peers(conn):
+    """Заполняет БД фейковыми пирами, чтобы их было видно в PeersPage/SendFilePage."""
+    demo_peers = [
+        {"name": "демо-Алексей", "ip": "192.168.1.50", "port": 65432},
+        {"name": "демо-Мария", "ip": "192.168.1.65", "port": 65432},
+        {"name": "демо-Сергей", "ip": "192.168.1.77", "port": 65432},
+    ]
+    for p in demo_peers:
+        db.add_peer(conn, "demo-" + p["name"], p["name"], p["ip"], p["port"])
+
+
+def show_demo_notification(hermes, bridge):
+    """Симулирует новую входящую передачу, что триггерит уведомление."""
+    meta = {
+        "filename": "demo_фото_отпуска.jpg",
+        "file_size": 2500000,
+        "chunks_count": 3,
+        "sha256": "a" * 64,
+    }
+    hermes.add_incoming_transfer(meta, "demo-демо-Мария")
+
+
 def main():
     conn = db.init_db()
     asyncio_loop = asyncio.new_event_loop()
@@ -105,7 +131,14 @@ def main():
         bridge._send_chunk_ack_async(pid, cid), asyncio_loop
     )
     hermes._on_sync_response = bridge.send_sync_response
+    hermes._on_new_incoming = lambda record: bridge.incomingTransfer.emit(
+        record["transfer_id"]
+    )
     engine.rootContext().setContextProperty("app", bridge)
+
+    if DEMO_DATA:
+        seed_demo_peers(conn)
+        QTimer.singleShot(1500, lambda: show_demo_notification(hermes, bridge))
 
     ui_dir = os.path.join(os.path.dirname(__file__), "..", "UI")
     engine.addImportPath(ui_dir)

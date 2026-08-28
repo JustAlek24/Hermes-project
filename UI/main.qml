@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import panels
 import pages
+import components
 //import dialogs
 import Theme
 
@@ -56,6 +57,41 @@ ApplicationWindow {
             AddPeerPage {} // Добавить пир
             AboutPage {} //О программе
             SettingsPage {} //Настройки
+        }
+
+        NotificationBanner {
+            id: notification
+            selectedTransferId: mainWindow.selectedTransferId
+
+            function currentTransferName(transferId) {
+                for (var t of app.transfers) {
+                    if (t.transfer_id === transferId) {
+                        return t.peer_name
+                    }
+                }
+                return ""
+            }
+
+            onViewed: function(transferId) {
+                // Явно пишем в корневое свойство окна. Нельзя просто
+                // `selectedTransferId = ...`: у NotificationBanner есть собственное
+                // свойство selectedTransferId (для автозакрытия), оно перекрывает
+                // корневое (shadowing), из-за чего страница не обновлялась.
+                mainWindow.selectedTransferId = transferId
+                currentScreen = pageViewIncoming
+                notification.hide()
+            }
+            onDismissed: notification.hide()
+        }
+
+        Connections {
+            target: app
+            function onIncomingTransfer(transferId) {
+                notification.show(
+                    "Пир " + notification.currentTransferName(transferId) + " хочет передать файл",
+                    transferId
+                )
+            }
         }
     }
 }

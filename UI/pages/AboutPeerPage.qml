@@ -11,6 +11,12 @@ PageWithBottomPanel {
 
     property var peerData: null
 
+    // Отслеживает выбранного пира (свойство главного окна).
+    // Поскольку страница создаётся один раз, пересчитываем данные
+    // при смене выделения, а не только при загрузке.
+    property string watchedPeer: selectedPeer
+    onWatchedPeerChanged: root.loadPeer()
+
     function loadPeer() {
         for (var p of app.peers) {
             if (p.peer_id === selectedPeer) {

@@ -7,6 +7,13 @@ import "../utils.js" as Utils
 
 PageWithBottomPanel {
     id: root
+
+    // Отслеживает выбранную передачу (свойство главного окна).
+    // Страница создаётся один раз, поэтому пересчитываем данные
+    // при смене выделения, а не только при переключении страниц.
+    property string watchedTransferId: selectedTransferId
+    onWatchedTransferIdChanged: root.updateTransfer()
+
     property var currentTransfer: ({
         transfer_id: "-",
         peer_name: "-", 
@@ -124,13 +131,6 @@ PageWithBottomPanel {
         })
     }
 
-    Connections {
-        target: mainWindow
-        function onSelectedTransferIdChanged() {
-            root.updateTransfer()
-        }
-    }
-    
     Connections {
         target: app
         function onTransfersChanged() {
