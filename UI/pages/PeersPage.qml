@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Theme
 import components
 import panels
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
 
@@ -32,7 +33,7 @@ PageWithBottomPanel {
             UniversalButton {
                 Layout.rightMargin: 10
                 text: "Добавить пир вручную"
-                onClicked: app.add_peer()
+                onClicked: currentScreen = pageAddPeer
             }
         }
     }
@@ -61,8 +62,8 @@ PageWithBottomPanel {
         }
     }
 
-    ListView { //Список входящих
-        id: incomingMessages
+    ListView { //Список пиров
+        id: peersList
         Layout.fillHeight: true
         Layout.fillWidth: true
         clip: true
@@ -109,7 +110,10 @@ PageWithBottomPanel {
                 id: listArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: currentScreen = pageViewIncoming
+                onClicked: {
+                    selectedPeer = model.peerID
+                    currentScreen = pageAboutPeer
+                }
                 cursorShape: Qt.PointingHandCursor
             }
         }
@@ -117,27 +121,18 @@ PageWithBottomPanel {
 
     ListModel {
         id: peersListModel
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
-        ListElement { peerID: "Абоба"; lastSeen: "Чуркистан"; status: "Негры"}
+    }
 
+    Connections {
+        target: app
+        function onNew_peer() {
+            peersListModel.clear()
+            for (var p of app.transfers) {
+                peersListModel.append({
+                    peerID: p.peer_id, lastSeen: Utils.formatDate(p.timestamp),
+                    status: p.status
+                })
+            }
+        }
     }
 }

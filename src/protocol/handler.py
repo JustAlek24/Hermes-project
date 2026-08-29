@@ -78,7 +78,8 @@ def handle_message(parsed, app):
     elif msg_type == "SYNC_REQUEST":
         peers = db.get_all_peers(app.db)
         resp = messages.create_sync_response(app.my_peer_id, peers)
-        asyncio.ensure_future(app.send_sync_response(peer_id, resp))
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(app.send_sync_response(peer_id, resp), loop)
 
     elif msg_type == "SYNC_RESPONSE":
         for p in parsed.get("data", {}).get("peers", []):
@@ -88,5 +89,4 @@ def handle_message(parsed, app):
                 p["peer_name"],
                 p["ip"],
                 p["port"],
-                p.get("version", 0),
             )

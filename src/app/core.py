@@ -4,6 +4,7 @@ import uuid
 
 from app import transfer
 from data import database as db
+from protocol import handler
 
 
 class _Pending:
@@ -14,8 +15,9 @@ class _Pending:
 
 
 class HermesApp:
-    def __init__(self, conn, on_transfer_changed=None):
+    def __init__(self, conn, loop=None, on_transfer_changed=None, on_chunk_ack=None):
         self.db = conn
+        self._loop = loop
         self.my_peer_id = uuid.uuid4().hex
         self._peer_status = {}
         self.pending_acks = {}
@@ -23,6 +25,11 @@ class HermesApp:
         self.transfer_queue = []
         self.tcp_connections = []
         self._on_transfer_changed = on_transfer_changed
+        self._on_chunk_ack = on_chunk_ack
+        self._on_sync_response = None
+
+    def parse_message(self, raw_string):
+        return handler.parse_message(raw_string)
 
     def update_peer_status(self, peer_id, status):
         self._peer_status[peer_id] = status
@@ -106,6 +113,8 @@ class HermesApp:
 
     def receive_chunk(self, peer_id, chunk_id, content):
         transfer.put_chunk(peer_id, chunk_id, content)
+        if self._on_chunk_ack:
+            self._on_chunk_ack(peer_id, chunk_id)
 
     def update_transfer_status(self, peer_id, status):
         for t in self._transfers:
@@ -122,3 +131,7 @@ class HermesApp:
 
     def on_user_send_file(self, peer_id, filepath):
         pass
+
+    async def send_sync_response(self, peer_id, resp):
+        if self._on_sync_response:
+            await self._on_sync_response(peer_id, resp)

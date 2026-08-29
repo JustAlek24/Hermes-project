@@ -1,4 +1,3 @@
-import json
 import time
 
 
@@ -9,16 +8,12 @@ def create_message(msg_type, peer_id, data=None):
     if data is None:
         data = {}
 
-    json_string = {
-        "type": msg_type,  # Тип json сообщения
-        "peer_id": peer_id,  # ID пира отправителя
-        "timestamp": timestamp,  # Время создания json сообщения
-        "data": data,  # Данные
+    return {
+        "type": msg_type,
+        "peer_id": peer_id,
+        "timestamp": timestamp,
+        "data": data,
     }
-
-    return json.dumps(
-        json_string, ensure_ascii=False
-    )  # Возвращаем json для передачи по сети
 
 
 def create_heartbeat(peer_id):

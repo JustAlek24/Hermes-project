@@ -23,9 +23,10 @@ class AppBridge(QObject):
     peerNamesChanged = Signal()
 
     # Инициализация класса
-    def __init__(self, core, parent=None):
+    def __init__(self, core, loop=None, parent=None):
         super().__init__(parent)
         self.core = core
+        self._loop = loop
 
     # Метод, запускающий сигнал о добавлении новго приёма файла
 
@@ -58,10 +59,13 @@ class AppBridge(QObject):
             if t["transfer_id"] == transfer_id:
                 t["status"] = "accepted"
                 transfer.init_receive_buffer(t["peer_id"], t)
-                asyncio.ensure_future(self._send_ack_async(t["peer_id"]))
-                asyncio.ensure_future(self._receive_async(t["peer_id"]))
+                coro1 = self._send_ack_async(t["peer_id"])
+                coro2 = self._receive_async(t["peer_id"])
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(coro1, self._loop)
+                    asyncio.run_coroutine_threadsafe(coro2, self._loop)
                 self.transfersChanged.emit()
-        print("Передача принята...")
+                return
 
     # Слот для кнопки отказа от принятия файлов
     @Slot(str)
@@ -69,9 +73,11 @@ class AppBridge(QObject):
         for t in self.core._transfers:
             if t["transfer_id"] == transfer_id:
                 t["status"] = "rejected"
-                asyncio.ensure_future(self._send_reject_async(t["peer_id"]))
+                coro = self._send_reject_async(t["peer_id"])
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(coro, self._loop)
                 self.transfersChanged.emit()
-        print("Передача отклонена...")
+                return
 
     # Слот для поиска пиров
     @Slot(str)
@@ -79,7 +85,7 @@ class AppBridge(QObject):
         print(f"Поиск: {query}")
 
     # Слот для отправки файла выбранному пиру
-    @Slot(str, str)
+    @Slot(str, str, str, str)
     def send_file(self, app, connection, peer_id, file_path):
         transfer.send_file(connection, file_path, peer_id, app)
         print(f"Отправка {file_path} пиру {peer_id}")
