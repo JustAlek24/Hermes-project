@@ -35,6 +35,12 @@ class HermesApp:
         self._peer_status[peer_id] = status
         self._peer_status = dict(self._peer_status)
 
+    def get_status(self, peer_id):
+        return self._peer_status.get(peer_id, "unknown")
+
+    def get_all_status(self):
+        return dict(self._peer_status)
+
     def register_pending(self, msg_type, peer_id, chunk_id=None):
         key = (peer_id, msg_type, chunk_id)
 
