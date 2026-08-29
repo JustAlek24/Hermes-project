@@ -8,8 +8,10 @@ import asyncio
 import json
 from src.network.connection import connect_to_peer, send_message, receive_message
 from src.protocol.messages import create_sync_request
-from src.data.database import apply_sync, init_db
+from src.data.database import apply_sync
 
+BOOTSTRAP_IP = "127.0.0.1"  
+BOOTSTRAP_PORT = 64352
 
 async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn):
     max_retries = 3
@@ -26,8 +28,8 @@ async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn
             cursor.execute("SELECT MAX(updated_at) FROM storage")
             result_of_cursor = cursor.fetchone()
 
-            if result[0]:
-                last_sync = result[0]
+            if result_of_cursor[0]:
+                last_sync = result_of_cursor[0]
             else:
                 last_sync = 0
 
