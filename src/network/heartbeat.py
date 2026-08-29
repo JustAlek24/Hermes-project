@@ -4,6 +4,7 @@ from src.network.connection import connect_to_peer, send_message, receive_messag
 from src.data.database import update_last_seen
 from src.protocol.messages import create_heartbeat
 
+
 async def heartbeat_loop(app, interval=60):
 
     while True:
@@ -45,4 +46,4 @@ async def heartbeat_loop(app, interval=60):
 
             except Exception:
                 app.update_peer_status(peer_id, "offline")
-        await asyncio.sleep(interval)    
+        await asyncio.sleep(interval)

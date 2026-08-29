@@ -10,8 +10,9 @@ from src.network.connection import connect_to_peer, send_message, receive_messag
 from src.protocol.messages import create_sync_request
 from src.data.database import apply_sync
 
-BOOTSTRAP_IP = "127.0.0.1"  
+BOOTSTRAP_IP = "127.0.0.1"
 BOOTSTRAP_PORT = 64352
+
 
 async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn):
     max_retries = 3
