@@ -1,8 +1,8 @@
 import asyncio
 import json
 
-from data import database as db
-from protocol import messages
+from src.data import database as db
+from src.protocol import messages
 
 KNOWN_TYPES = {
     "HEARTBEAT",
