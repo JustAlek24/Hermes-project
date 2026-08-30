@@ -26,7 +26,7 @@ PageWithBottomPanel {
                 color: Theme.textColor
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.textSecondaryColor }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.divider }
 
             Text {
                 text: "Папка загрузок: ~/Downloads"

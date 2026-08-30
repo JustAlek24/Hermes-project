@@ -54,7 +54,7 @@ PageWithBottomPanel {
                 color: Theme.textColor
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.textSecondaryColor }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.divider }
 
             RowLayout {
                 Text { text: "ID: "; color: Theme.textSecondaryColor; font.pixelSize: 14 }
@@ -87,6 +87,17 @@ PageWithBottomPanel {
                 }
 
                 Item { Layout.fillWidth: true }
+
+                UniversalButton {
+                    text: "Отправить файл"
+                    normalColor: Theme.buttonPrimary
+                    hoverColor: Theme.buttonPrimaryHover
+                    onClicked: {
+                        if (root.peerData) {
+                            app.choose_send_file(root.peerData.peer_id)
+                        }
+                    }
+                }
 
                 UniversalButton {
                     text: "Удалить пира"

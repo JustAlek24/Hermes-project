@@ -7,3 +7,4 @@ PageWithBottomPanel PageWithBottomPanel.qml
 StatusIndicator StatusIndicator.qml
 InfoRow InfoRow.qml
 NotificationBanner NotificationBanner.qml
+LabeledInput LabeledInput.qml

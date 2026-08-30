@@ -4,6 +4,7 @@ import time
 import uuid
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
+from PySide6.QtWidgets import QFileDialog
 
 from app import transfer
 from data import database as db
@@ -17,11 +18,9 @@ DEFAULT_PORT = 65432  # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - У
 class AppBridge(QObject):
     ### Сигналы ###
     new_peer = Signal(str)
-    status_changed = Signal(str, str)
     peerStatusChanged = Signal()
     ownAddressChanged = Signal()
     transfersChanged = Signal()
-    peerNamesChanged = Signal()
     peersChanged = Signal()
     transferProgressChanged = Signal()
     incomingTransfer = Signal(str)
@@ -31,6 +30,7 @@ class AppBridge(QObject):
         self.core = core
         self._loop = loop
         self._transfer_progress = {}
+        self._save_dir = os.path.expanduser("~/Downloads")
 
     def add_output_transfer(self, filepath, peer_id):
         peer = db.get_peer(self.core.db, peer_id)
@@ -96,6 +96,16 @@ class AppBridge(QObject):
                 self.transfersChanged.emit()
                 return
 
+    @Slot(result=str)
+    def choose_save_dir(self):
+        directory = QFileDialog.getExistingDirectory(
+            None, "Выберите папку для приёма файла", self._save_dir
+        )
+        if directory:
+            self._save_dir = directory
+            return directory
+        return ""
+
     @Slot(str)
     def reject_transfer(self, transfer_id):
         for t in self.core._transfers:
@@ -110,6 +120,14 @@ class AppBridge(QObject):
     @Slot(str)
     def search_peers(self, query):
         print(f"Поиск: {query}")
+
+    @Slot(str)
+    def choose_send_file(self, peer_id):
+        file_path, _ = QFileDialog.getOpenFileName(
+            None, "Выберите файл для отправки", ""
+        )
+        if file_path:
+            self.send_file(peer_id, file_path)
 
     @Slot(str, str)
     def send_file(self, peer_id, file_path):
@@ -194,7 +212,7 @@ class AppBridge(QObject):
         if peer:
             connection = await connect.connect_to_peer(peer["ip"], peer["port"])
             if connection:
-                output_dir = os.path.expanduser("~/Downloads")
+                output_dir = self._save_dir
 
                 def on_progress(percent):
                     self._transfer_progress[peer_id] = percent
@@ -215,5 +233,4 @@ class AppBridge(QObject):
 
     def update_peer_status(self, peer_id, status):
         self.core.update_peer_status(peer_id, status)
-        self.status_changed.emit(peer_id, status)
         self.peerStatusChanged.emit()

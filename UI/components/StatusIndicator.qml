@@ -2,7 +2,6 @@ import QtQuick
 import Theme
 
 
-
 Rectangle {
     id: statusBar
     property string status: "pending"

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Theme
 import components
 import panels
+import "../utils.js" as Utils
 
 PageWithBottomPanel {
 
@@ -51,11 +52,15 @@ PageWithBottomPanel {
             }
             Text {
                 text: "IP"
+                Layout.preferredWidth: 150
+            }
+            Text {
+                text: "Был в сети"
                 Layout.fillWidth: true
             }
             Text {
-                text: "Порт"
-                Layout.preferredWidth: 80
+                text: "Статус"
+                Layout.preferredWidth: 90
                 Layout.rightMargin: 10
             }
         }
@@ -80,17 +85,37 @@ PageWithBottomPanel {
                     text: model.peerName
                     Layout.preferredWidth: 150
                     Layout.leftMargin: 10
+                    elide: Text.ElideRight
                 }
 
                 Text {
                     text: model.peerIP
-                    Layout.fillWidth: true
+                    Layout.preferredWidth: 150
+                    elide: Text.ElideRight
                 }
 
                 Text {
-                    text: model.peerPort
-                    Layout.preferredWidth: 80
+                    text: model.lastSeen
+                    Layout.fillWidth: true
+                }
+
+                RowLayout {
+                    Layout.preferredWidth: 90
                     Layout.rightMargin: 10
+                    spacing: 6
+
+                    Rectangle {
+                        width: 10
+                        height: 10
+                        radius: 5
+                        color: model.status === "online" ? Theme.statusOnline
+                             : model.status === "missed" ? Theme.statusMissed
+                             : Theme.statusOffline
+                    }
+                    Text {
+                        text: model.statusText
+                        color: Theme.textColor
+                    }
                 }
             }
 
@@ -99,7 +124,7 @@ PageWithBottomPanel {
                 anchors.right: parent.right
                 anchors.left: parent.left
             
-                color: Theme.textSecondaryColor
+                color: Theme.divider
                 height: 1
             }
         
@@ -123,23 +148,40 @@ PageWithBottomPanel {
     Connections {
         target: app
         function onPeersChanged() {
-            peersListModel.clear()
-            for (var p of app.peers) {
-                peersListModel.append({
-                    peerID: p.peer_id, peerName: p.peer_name,
-                    peerIP: p.ip, peerPort: p.port
-                })
-            }
+            appendPeers()
+        }
+        function onPeerStatusChanged() {
+            appendPeers()
         }
     }
 
-    Component.onCompleted: {
-        peersListModel.clear()
+    function peerStatusOf(p) {
+        var st = app.peer_status[p.peer_id]
+        if (st === "online") return "online"
+        if (st === "missed" || st === "warning") return "missed"
+        return "offline"
+    }
+
+    function statusTextOf(status) {
+        if (status === "online") return "онлайн"
+        if (status === "missed") return "пропущен"
+        return "офлайн"
+    }
+
+    function appendPeers() {
+        var items = []
         for (var p of app.peers) {
-            peersListModel.append({
+            var st = peerStatusOf(p)
+            items.push({
                 peerID: p.peer_id, peerName: p.peer_name,
-                peerIP: p.ip, peerPort: p.port
+                peerIP: p.ip, peerPort: p.port,
+                lastSeen: Utils.formatRelative(p.last_seen),
+                status: st,
+                statusText: statusTextOf(st)
             })
         }
+        Utils.fillListModel(peersListModel, items)
     }
+
+    Component.onCompleted: appendPeers()
 }

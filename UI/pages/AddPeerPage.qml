@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Theme
 import panels
 import components
@@ -9,122 +10,98 @@ PageWithBottomPanel {
 
     HeaderPanel {currentPage: "Добавить пир"}
 
-    Rectangle {
+    // Контейнер без layout-управления: внутри — карточка и её тень (anchors валидны).
+    Item {
         Layout.fillHeight: true
         Layout.fillWidth: true
         Layout.margins: 20
-        radius: 10
-        color: Theme.cardBackground
 
-        ColumnLayout {
+        Rectangle {
+            id: card
             anchors.fill: parent
-            anchors.margins: 30
-            spacing: 20
-
-            Text {
-                text: "Добавление нового пира"
-                font.pixelSize: 18
-                font.bold: true
-                color: Theme.textColor
-            }
+            radius: 10
+            color: Theme.cardBackground
 
             ColumnLayout {
-                spacing: 5
-                Text { text: "Имя"; color: Theme.textColor; font.pixelSize: 14 }
-                Rectangle {
+                anchors.fill: parent
+                anchors.margins: 30
+                spacing: 20
+
+                Text {
+                    text: "Добавление нового пира"
+                    font.pixelSize: 18
+                    font.bold: true
+                    color: Theme.textColor
+                }
+
+                LabeledInput {
+                    id: nameInput
+                    label: "Имя"
                     Layout.fillWidth: true
-                    height: 40
-                    radius: 6
-                    color: Theme.secondaryColor
-                    TextInput {
-                        id: nameInput
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        color: Theme.textColor
-                        font.pixelSize: 14
-                        clip: true
-                    }
                 }
-            }
-
-            ColumnLayout {
-                spacing: 5
-                Text { text: "IP-адрес"; color: Theme.textColor; font.pixelSize: 14 }
-                Rectangle {
+                LabeledInput {
+                    id: ipInput
+                    label: "IP-адрес"
                     Layout.fillWidth: true
-                    height: 40
-                    radius: 6
-                    color: Theme.secondaryColor
-                    TextInput {
-                        id: ipInput
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        color: Theme.textColor
-                        font.pixelSize: 14
-                        clip: true
-                        inputMethodHints: Qt.ImhFormattedNumbersOnly
-                    }
+                    input.inputMethodHints: Qt.ImhFormattedNumbersOnly
                 }
-            }
-
-            ColumnLayout {
-                spacing: 5
-                Text { text: "Порт"; color: Theme.textColor; font.pixelSize: 14 }
-                Rectangle {
+                LabeledInput {
+                    id: portInput
+                    label: "Порт"
                     Layout.fillWidth: true
-                    height: 40
-                    radius: 6
-                    color: Theme.secondaryColor
-                    TextInput {
-                        id: portInput
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        color: Theme.textColor
-                        font.pixelSize: 14
-                        clip: true
-                        inputMethodHints: Qt.ImhDigitsOnly
+                    input.inputMethodHints: Qt.ImhDigitsOnly
+                }
+
+                Text {
+                    id: statusText
+                    text: ""
+                    color: statusText.text.indexOf("Ошибка") >= 0 ? Theme.statusError : Theme.statusDone
+                    font.pixelSize: 13
+                    visible: text !== ""
+                }
+
+                Item { Layout.fillHeight: true }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    UniversalButton {
+                        text: "Назад"
+                        onClicked: currentScreen = pagePeers
                     }
-                }
-            }
 
-            Text {
-                id: statusText
-                text: ""
-                color: statusText.text.indexOf("Ошибка") >= 0 ? Theme.statusError : Theme.statusDone
-                font.pixelSize: 13
-                visible: text !== ""
-            }
+                    Item { Layout.fillWidth: true }
 
-            Item { Layout.fillHeight: true }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                UniversalButton {
-                    text: "Назад"
-                    onClicked: currentScreen = pagePeers
-                }
-
-                Item { Layout.fillWidth: true }
-
-                UniversalButton {
-                    text: "Добавить"
-                    enabled: nameInput.text !== "" && ipInput.text !== "" && portInput.text !== ""
-                    normalColor: Theme.buttonPrimary
-                    hoverColor: Theme.buttonPrimaryHover
-                    onClicked: {
-                        var ok = app.add_peer(nameInput.text, ipInput.text, portInput.text)
-                        if (ok) {
-                            nameInput.text = ""
-                            ipInput.text = ""
-                            portInput.text = ""
-                            statusText.text = "Пир добавлен"
-                        } else {
-                            statusText.text = "Ошибка: пир уже существует или неверные данные"
+                    UniversalButton {
+                        text: "Добавить"
+                        enabled: nameInput.inputText !== "" && ipInput.inputText !== "" && portInput.inputText !== ""
+                        normalColor: Theme.buttonPrimary
+                        hoverColor: Theme.buttonPrimaryHover
+                        onClicked: {
+                            var ok = app.add_peer(nameInput.inputText, ipInput.inputText, portInput.inputText)
+                            if (ok) {
+                                nameInput.inputText = ""
+                                ipInput.inputText = ""
+                                portInput.inputText = ""
+                                statusText.text = "Пир добавлен"
+                            } else {
+                                statusText.text = "Ошибка: пир уже существует или неверные данные"
+                            }
                         }
                     }
                 }
             }
+        }
+
+        MultiEffect {
+            source: card
+            anchors.fill: card
+            anchors.margins: 18
+            shadowEnabled: true
+            shadowColor: Theme.cardShadow
+            shadowBlur: 0.55
+            shadowVerticalOffset: 8
+            z: -1
         }
     }
 }

@@ -11,8 +11,8 @@ if sys.platform == "win32" and os.path.isdir(_pyside6_dir):
     os.add_dll_directory(_pyside6_dir)
 
 from PySide6.QtCore import QTimer, QUrl
-from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtWidgets import QApplication
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "."))
 
@@ -42,6 +42,43 @@ from data import database as db
 # - SYNC_REQUEST использует app._loop вместо asyncio.get_event_loop().
 # - database.py: убран опасный main() с тестовыми данными. __tests__.py почищен.
 #
+# == GUI: закрытые issues (#31,#32,#33,#34,#36) — сделано ==
+# - Уведомление (NotificationBanner.qml): правая верхняя, "Пир X хочет передать файл",
+#   слайд-ин/аут, кнопка "Посмотреть" -> ViewIncomingPage, авто-закрытие при открытии
+#   той же передачи. Причина bug-а была shadowing: на NotificationBanner своё свойство
+#   selectedTransferId перекрывало корневое — в onViewed пишем явно mainWindow.selectedTransferId.
+# - ViewIncomingPage: замена хрупкого `Connections { target: mainWindow }` на реактивный
+#   binding `watchedTransferId: selectedTransferId` -> updateTransfer(). Динамический
+#   заголовок по direction, кнопки Принять/Отклонить только для входящих pending.
+# - "Принять" теперь спрашивает папку через нативный QFileDialog (bridge.choose_save_dir),
+#   выбранная папка = output_dir приёма. Отмена = ничего.
+# - SentPage: клик по записи ведёт на детали (pageViewIncoming), а не на pageSendFile.
+# - PeersPage (#32): колонки "Был в сети" (Utils.formatRelative) + цветной статус-индикатор
+#   (онлайн/пропущен/офлайн) из app.peer_status; переисп. helper appendPeers().
+#     Theme: добавлены statusOnline/statusMissed/statusOffline.
+#   AboutPeerPage: кнопка "Отправить файл" -> app.choose_send_file (нативный QFileDialog).
+# - BottomPanel (#36): развёрнутое состояние — ListView детализации передач (направление,
+#   файл, размер, статус, SHA256, прогресс-бар для активных) + ручка-хендл.
+#     Scrim + сворачивание уже были в PageWithBottomPanel.
+# - QFileDialog требует QApplication (не QGuiApplication): main.py переведён на QApplication.
+# - AboutPeerPage: был баг "Пир не найден" на каждый клик — страница создаётся один раз и
+#   не пересчитывалась; фикс через watchedPeer->loadPeer() (аналог ViewIncomingPage).
+#
+# == Осталось решить (GUI) ==
+# - StatusIndicator.qml: эксперимент по чистке (убрать магические ширины/позиции) ОТКАЧЕН
+#   по требованию юзера — файл возвращён в исходное состояние "как было".
+# - HeaderPanel: градиент сделан через core QtQuick `Rectangle.gradient` (Gradient/
+#   GradientStop), без Qt5Compat.GraphicalEffects. Цвета — Theme.mainTopleftPanelColor ->
+#   Theme.leftPanelColor.
+# - Theme: tableColor (неиспользуемый) и headerGradient (мёртвый var) УДАЛЕНЫ.
+#   cardShadow — MultiEffect-тень на карточке AddPeerPage ПОДТВЕРЖДЕНА: модуль
+#   QtQuick.Effects есть в сборке (effectsplugin.dll), import корректен.
+# - LabeledInput.qml: НОВЫЙ переиспользуемый компонент (label + TextInput c типом/подсветкой
+#   активного поля). Зарегистрирован в components/qmldir. Применён в AddPeerPage вместо
+#   3× ColumnLayout+TextInput. Проверено: приложение грузится OK.
+# - utils.js: добавлен общий helper fillListModel(model, items) (clear+append), применён в
+#   PeersPage / IncomingPage / SentPage / BottomPanel вместо ручных clear+for append.
+#
 # == Заглушки (awaiting network #24) ==
 # find_peers() (bridge.py)        — print. Кнопка "Найти пир в сети Wi-Fi".
 #                                   Должна искать через UDP broadcast (#22).
@@ -55,8 +92,10 @@ from data import database as db
 #                                   работе.
 #
 # == Осталось решить ==
-# - Мёртвые сигналы: status_changed, ownAddressChanged, peerNamesChanged.
-# - peer_status @Property — нет потребителя в QML.
+# - Удалены мёртвые сигналы bridge: status_changed, peerNamesChanged (не имели потребителей).
+#   ownAddressChanged ОСТАВЛЕН — это notify для свойства app.own_address (показывается в
+#   BottomPanel), хоть и не эмитится.
+# - peer_status @Property — потребитель есть: PeersPage читает app.peer_status[p.peer_id].
 # - update_peer vs apply_sync: SYNC_RESPONSE хардкодит db.add_peer вместо db.apply_sync.
 # - progress два потока: dict _transfer_progress не потокобезопасен (оба направления
 #   пишут из разных мест). Внутри Qt main thread ок, но при росте - ревью.
@@ -119,7 +158,7 @@ def main():
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(_root)
     os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
-    app = QGuiApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
     engine.addImportPath(os.path.dirname(os.path.abspath(__file__)))

@@ -80,7 +80,7 @@ PageWithBottomPanel {
                 anchors.right: parent.right
                 anchors.left: parent.left
 
-                color: Theme.textSecondaryColor
+                color: Theme.divider
                 height: 1
             }
 
@@ -102,15 +102,16 @@ PageWithBottomPanel {
     Connections {
         target: app
         function onTransfersChanged() {
-            incomingMessageModel.clear()
+            var items = []
             for (var t of app.transfers) {
                 if (t.direction !== "in") continue
-                incomingMessageModel.append({
+                items.push({
                     peerName: t.peer_name, message: t.filename,
                     date: Utils.formatDate(t.timestamp), transferId: t.transfer_id,
                     status: t.status
                 })
             }
+            Utils.fillListModel(incomingMessageModel, items)
         }
     }
 }

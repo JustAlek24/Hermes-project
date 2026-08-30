@@ -27,7 +27,7 @@ PageWithBottomPanel {
 
     HeaderPanel {
         id: headerPanel
-        currentPage: "Входящее сообщение"
+        currentPage: root.currentTransfer.direction === "out" ? "Отправленное сообщение" : "Входящее сообщение"
     }
     
     Item {
@@ -79,7 +79,7 @@ PageWithBottomPanel {
     }
 
     Rectangle {
-        visible: (root.currentTransfer.status === "pending") ? true : false
+        visible: (root.currentTransfer.direction === "in" && root.currentTransfer.status === "pending") ? true : false
         height: 100
 
         radius: 10
@@ -97,7 +97,12 @@ PageWithBottomPanel {
                 Layout.leftMargin: 10
                 normalColor: Theme.buttonPrimary
                 hoverColor: Theme.buttonPrimaryHover 
-                onClicked: app.accept_transfer(root.currentTransfer.transfer_id)
+                onClicked: {
+                    var dir = app.choose_save_dir()
+                    if (dir) {
+                        app.accept_transfer(root.currentTransfer.transfer_id)
+                    }
+                }
             }
 
             UniversalButton {
