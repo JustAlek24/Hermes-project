@@ -4,6 +4,7 @@ import json
 from data import database as db
 from protocol import messages, sec
 
+
 KNOWN_TYPES = {
     "HEARTBEAT",
     "META",
