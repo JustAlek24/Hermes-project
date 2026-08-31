@@ -133,7 +133,11 @@ class HermesApp:
             self._on_transfer_changed()
 
     def on_user_add_peer(self, name, ip, port):
-        pass
+        peer_id = uuid.uuid4().hex
+        ok = db.add_peer(self.db, peer_id, name, ip, port)
+        if ok and self._on_transfer_changed:
+            self._on_transfer_changed()
+        return ok
 
     def on_user_search_peers(self):
         pass

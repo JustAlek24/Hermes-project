@@ -1,14 +1,8 @@
-import sys
-from pathlib import Path
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT_DIR.parent))
-
 import asyncio
 import json
 import logging
 
-from src.protocol.handler import handle_message
+from protocol.handler import handle_message
 
 _connections = {}
 _connection_lock = asyncio.Lock()

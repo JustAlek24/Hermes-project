@@ -1,14 +1,9 @@
-import sys
-from pathlib import Path
-
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(ROOT_DIR))
-
 import asyncio
 import json
-from src.network.connection import connect_to_peer, send_message, receive_message
-from src.protocol.messages import create_sync_request
-from src.data.database import apply_sync
+
+from data.database import apply_sync
+from network.connection import connect_to_peer, receive_message, send_message
+from protocol.messages import create_sync_request
 
 BOOTSTRAP_IP = "127.0.0.1"
 BOOTSTRAP_PORT = 64352

@@ -4,7 +4,6 @@ import json
 from data import database as db
 from protocol import messages, sec
 
-
 KNOWN_TYPES = {
     "HEARTBEAT",
     "META",
@@ -90,11 +89,5 @@ def handle_message(parsed, app):
         )
 
     elif msg_type == "SYNC_RESPONSE":
-        for p in parsed.get("data", {}).get("peers", []):
-            db.add_peer(
-                app.db,
-                p["peer_id"],
-                p["peer_name"],
-                p["ip"],
-                p["port"],
-            )
+        peers = parsed.get("data", {}).get("peers", [])
+        db.apply_sync(app.db, peers)

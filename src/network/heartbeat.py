@@ -1,8 +1,9 @@
 import asyncio
 import json
-from src.network.connection import connect_to_peer, send_message, receive_message
-from src.data.database import update_last_seen
-from src.protocol.messages import create_heartbeat
+
+from data.database import update_last_seen
+from network.connection import connect_to_peer, receive_message, send_message
+from protocol.messages import create_heartbeat
 
 
 async def heartbeat_loop(app, interval=60):
@@ -41,7 +42,7 @@ async def heartbeat_loop(app, interval=60):
                 else:
                     app.update_peer_status(peer_id, "offline")
 
-                writer.close
+                writer.close()
                 await writer.wait_closed()
 
             except Exception:
