@@ -9,12 +9,12 @@ PageWithBottomPanel {
 
     HeaderPanel {currentPage: "Известные пиры"}
 
-    Rectangle { //Панель кнопок для работы с пирами
+    Rectangle {
         id: peersButtons
         height: 60
         color: Theme.mainTopleftPanelColor
         Layout.fillWidth: true
-        RowLayout { //Строка кнопок
+        RowLayout {
             anchors.fill: parent
             
             spacing: 20
@@ -38,7 +38,7 @@ PageWithBottomPanel {
         }
     }
 
-    Rectangle { //Шапка таблицы
+    Rectangle {
         id: tableHead
         height: 40
         Layout.fillWidth: true
@@ -46,9 +46,13 @@ PageWithBottomPanel {
         RowLayout {
             anchors.fill: parent
             Text {
-                text: "ID пира"
+                text: "Имя пира"
                 Layout.preferredWidth: 150
                 Layout.leftMargin: 10
+            }
+            Text {
+                text: "IP"
+                Layout.preferredWidth: 150
             }
             Text {
                 text: "Был в сети"
@@ -56,23 +60,21 @@ PageWithBottomPanel {
             }
             Text {
                 text: "Статус"
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 90
                 Layout.rightMargin: 10
             }
         }
     }
 
-    ListView { //Список пиров
+    ListView {
         id: peersList
         Layout.fillHeight: true
         Layout.fillWidth: true
         clip: true
-        
 
         model: peersListModel
 
         delegate: Rectangle {
-
             width: ListView.view.width
             height: 50
             color: listArea.containsMouse ? Theme.accentColor : "transparent"
@@ -80,9 +82,16 @@ PageWithBottomPanel {
                 anchors.fill: parent
 
                 Text {
-                    text: model.peerID
+                    text: model.peerName
                     Layout.preferredWidth: 150
                     Layout.leftMargin: 10
+                    elide: Text.ElideRight
+                }
+
+                Text {
+                    text: model.peerIP
+                    Layout.preferredWidth: 150
+                    elide: Text.ElideRight
                 }
 
                 Text {
@@ -90,10 +99,23 @@ PageWithBottomPanel {
                     Layout.fillWidth: true
                 }
 
-                Text {
-                    text: model.status
-                    Layout.preferredWidth: 100
+                RowLayout {
+                    Layout.preferredWidth: 90
                     Layout.rightMargin: 10
+                    spacing: 6
+
+                    Rectangle {
+                        width: 10
+                        height: 10
+                        radius: 5
+                        color: model.status === "online" ? Theme.statusOnline
+                             : model.status === "missed" ? Theme.statusMissed
+                             : Theme.statusOffline
+                    }
+                    Text {
+                        text: model.statusText
+                        color: Theme.textColor
+                    }
                 }
             }
 
@@ -102,7 +124,7 @@ PageWithBottomPanel {
                 anchors.right: parent.right
                 anchors.left: parent.left
             
-                color: Theme.textSecondaryColor
+                color: Theme.divider
                 height: 1
             }
         
@@ -125,14 +147,41 @@ PageWithBottomPanel {
 
     Connections {
         target: app
-        function onNew_peer() {
-            peersListModel.clear()
-            for (var p of app.transfers) {
-                peersListModel.append({
-                    peerID: p.peer_id, lastSeen: Utils.formatDate(p.timestamp),
-                    status: p.status
-                })
-            }
+        function onPeersChanged() {
+            appendPeers()
+        }
+        function onPeerStatusChanged() {
+            appendPeers()
         }
     }
+
+    function peerStatusOf(p) {
+        var st = app.peer_status[p.peer_id]
+        if (st === "online") return "online"
+        if (st === "missed" || st === "warning") return "missed"
+        return "offline"
+    }
+
+    function statusTextOf(status) {
+        if (status === "online") return "онлайн"
+        if (status === "missed") return "пропущен"
+        return "офлайн"
+    }
+
+    function appendPeers() {
+        var items = []
+        for (var p of app.peers) {
+            var st = peerStatusOf(p)
+            items.push({
+                peerID: p.peer_id, peerName: p.peer_name,
+                peerIP: p.ip, peerPort: p.port,
+                lastSeen: Utils.formatRelative(p.last_seen),
+                status: st,
+                statusText: statusTextOf(st)
+            })
+        }
+        Utils.fillListModel(peersListModel, items)
+    }
+
+    Component.onCompleted: appendPeers()
 }

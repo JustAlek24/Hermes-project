@@ -1,4 +1,1 @@
-peer_status = {
-    "online",
-    "offline",
-}
+peer_status = {"online", "offline"}

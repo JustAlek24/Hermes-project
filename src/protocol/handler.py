@@ -1,8 +1,9 @@
 import asyncio
 import json
 
-from src.data import database as db
-from src.protocol import messages
+from data import database as db
+from protocol import messages, sec
+
 
 KNOWN_TYPES = {
     "HEARTBEAT",
@@ -60,9 +61,15 @@ def handle_message(parsed, app):
         )
 
     elif msg_type == "META":
+        valid, _ = sec.validate_message(parsed)
+        if not valid:
+            return
         app.add_incoming_transfer(parsed.get("data"), peer_id)
 
     elif msg_type == "FILE_CHUNK":
+        valid, _ = sec.validate_message(parsed)
+        if not valid:
+            return
         chunk_id = parsed["data"].get("chunk_id")
         content = parsed["data"].get("content")
         app.receive_chunk(peer_id, chunk_id, content)
@@ -78,8 +85,9 @@ def handle_message(parsed, app):
     elif msg_type == "SYNC_REQUEST":
         peers = db.get_all_peers(app.db)
         resp = messages.create_sync_response(app.my_peer_id, peers)
-        loop = asyncio.get_event_loop()
-        asyncio.run_coroutine_threadsafe(app.send_sync_response(peer_id, resp), loop)
+        asyncio.run_coroutine_threadsafe(
+            app.send_sync_response(peer_id, resp), app._loop
+        )
 
     elif msg_type == "SYNC_RESPONSE":
         for p in parsed.get("data", {}).get("peers", []):

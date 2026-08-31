@@ -6,7 +6,13 @@ Rectangle { //Верхняя панель
     id: topPanel
     Layout.fillWidth: true
     height: 80
-    color: Theme.mainTopleftPanelColor
+
+    // Градиент в шапке вместо плоского цвета (см. Theme.headerGradient)
+    gradient: Gradient {
+        orientation: Gradient.Horizontal
+        GradientStop { position: 0.0; color: Theme.mainTopleftPanelColor }
+        GradientStop { position: 1.0; color: Theme.leftPanelColor }
+    }
 
     property string currentPage: ""
 

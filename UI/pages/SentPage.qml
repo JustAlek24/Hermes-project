@@ -81,7 +81,7 @@ PageWithBottomPanel {
                 anchors.right: parent.right
                 anchors.left: parent.left
             
-                color: Theme.textSecondaryColor
+                color: Theme.divider
                 height: 1
             }
         
@@ -91,7 +91,7 @@ PageWithBottomPanel {
                 hoverEnabled: true
                 onClicked: {
                     selectedTransferId = model.transferId 
-                    currentScreen = pageSendFile
+                    currentScreen = pageViewIncoming
                 }
                 cursorShape: Qt.PointingHandCursor
             }
@@ -103,15 +103,16 @@ PageWithBottomPanel {
     Connections {
         target: app
         function onTransfersChanged() {
-            sentMessageModel.clear()
+            var items = []
             for (var t of app.transfers) {
                 if (t.direction !== "out") continue
-                sentMessageModel.append({
+                items.push({
                     peerName: t.peer_name, message: t.filename,
-                    date: Utils.formatDate(t.timestamp), transferID: t.transfer_id,
+                    date: Utils.formatDate(t.timestamp), transferId: t.transfer_id,
                     status: t.status
                 })
             }
+            Utils.fillListModel(sentMessageModel, items)
         }
     }
 }

@@ -10,7 +10,6 @@ QtObject {
     readonly property color textColor: '#00014c'                 // Основной текст
     readonly property color textSecondaryColor: '#00274c'        // Второстепенный текст
     readonly property color accentColor: '#9ea1ff'              // Акцентные элементы
-    readonly property color tableColor: '#2148da'               // Таблицы, выделение
     
     // === НОВЫЕ ЦВЕТА (для завершённости) ===
     readonly property color cardBackground: '#ffffff'            // Фон карточек (белый)
@@ -24,22 +23,15 @@ QtObject {
     readonly property color statusDone: '#66bb6a'              // Зелёный (получен)
     readonly property color statusRejected: '#ef5350'          // Красный (отклонён)
     readonly property color statusError: '#ff0000'             // Серый (ошибка)
+
+    // Статусы пиров (экран пиров #32)
+    readonly property color statusOnline: '#3cb371'           // Зелёный — онлайн
+    readonly property color statusMissed: '#ffd54f'           // Жёлтый — пропущенные heartbeat
+    readonly property color statusOffline: '#9e9e9e'          // Серый — офлайн
     
     // === КНОПКИ ===
     readonly property color buttonPrimary: '#4fe4ff'           // Синяя (принять)
     readonly property color buttonPrimaryHover: '#2fdca2'      // При наведении
     readonly property color buttonSecondary: '#e8ecf8'         // Серая (отклонить)
     readonly property color buttonSecondaryHover: '#fbd0d0'    // При наведении
-    
-    // === ГРАДИЕНТЫ (для шапок) ===
-    readonly property var headerGradient: {
-        return {
-            type: "linear",
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stops: [
-                { position: 0, color: '#a9d5ff' },
-                { position: 1, color: '#e1e1ff' }
-            ]
-        }
-    }
 }

@@ -10,15 +10,106 @@ _pyside6_dir = os.path.normpath(_pyside6_dir)
 if sys.platform == "win32" and os.path.isdir(_pyside6_dir):
     os.add_dll_directory(_pyside6_dir)
 
-from PySide6.QtCore import QUrl
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtWidgets import QApplication
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "."))
 
 from app.bridge import AppBridge
 from app.core import HermesApp
 from data import database as db
+
+# =============================================================================
+# TODO: Что осталось доделать
+# =============================================================================
+#
+# == СДЕЛАНО (не трогать, не в issues) ==
+# - Race condition: буфер META создаётся сразу при add_incoming_transfer (core.py),
+#   чанки до нажатия "Принять" больше не теряются.
+# - SentPage: add_output_transfer реализован (bridge.py), отправки записываются
+#   в _transfers с direction "out". Фикс tyзpo transferID -> transferId.
+# - ProgressBar: bridge.send_file/_receive_async передают progress_callback,
+#   который пишет в _transfer_progress (dict peer_id->percent), BottomPanel
+#   читает app.transfer_progress.
+# - PeersPage: добавлены app.peers (@Property list, notify=peersChanged) и сигнал
+#   peersChanged. Список пиров из db.get_all_peers. Фикс сломанного Connections.
+# - SendFilePage: UI с FileDialog + списком пиров, вызывает app.send_file(peer_id, path).
+# - AddPeerPage: форма (имя/IP/порт) -> app.add_peer(name, ip, port) -> db.add_peer.
+# - AboutPeerPage: инфо из app.peers + кнопка удаления (app.remove_peer).
+# - AboutPage/SettingsPage: базовый контент вместо "Скоро тут будет код".
+# - sec.validate_message подключён к handler (META/FILE_CHUNK валидируются).
+# - SYNC_REQUEST использует app._loop вместо asyncio.get_event_loop().
+# - database.py: убран опасный main() с тестовыми данными. __tests__.py почищен.
+#
+# == GUI: закрытые issues (#31,#32,#33,#34,#36) — сделано ==
+# - Уведомление (NotificationBanner.qml): правая верхняя, "Пир X хочет передать файл",
+#   слайд-ин/аут, кнопка "Посмотреть" -> ViewIncomingPage, авто-закрытие при открытии
+#   той же передачи. Причина bug-а была shadowing: на NotificationBanner своё свойство
+#   selectedTransferId перекрывало корневое — в onViewed пишем явно mainWindow.selectedTransferId.
+# - ViewIncomingPage: замена хрупкого `Connections { target: mainWindow }` на реактивный
+#   binding `watchedTransferId: selectedTransferId` -> updateTransfer(). Динамический
+#   заголовок по direction, кнопки Принять/Отклонить только для входящих pending.
+# - "Принять" теперь спрашивает папку через нативный QFileDialog (bridge.choose_save_dir),
+#   выбранная папка = output_dir приёма. Отмена = ничего.
+# - SentPage: клик по записи ведёт на детали (pageViewIncoming), а не на pageSendFile.
+# - PeersPage (#32): колонки "Был в сети" (Utils.formatRelative) + цветной статус-индикатор
+#   (онлайн/пропущен/офлайн) из app.peer_status; переисп. helper appendPeers().
+#     Theme: добавлены statusOnline/statusMissed/statusOffline.
+#   AboutPeerPage: кнопка "Отправить файл" -> app.choose_send_file (нативный QFileDialog).
+# - BottomPanel (#36): развёрнутое состояние — ListView детализации передач (направление,
+#   файл, размер, статус, SHA256, прогресс-бар для активных) + ручка-хендл.
+#     Scrim + сворачивание уже были в PageWithBottomPanel.
+# - QFileDialog требует QApplication (не QGuiApplication): main.py переведён на QApplication.
+# - AboutPeerPage: был баг "Пир не найден" на каждый клик — страница создаётся один раз и
+#   не пересчитывалась; фикс через watchedPeer->loadPeer() (аналог ViewIncomingPage).
+#
+# == Осталось решить (GUI) ==
+# - StatusIndicator.qml: эксперимент по чистке (убрать магические ширины/позиции) ОТКАЧЕН
+#   по требованию юзера — файл возвращён в исходное состояние "как было".
+# - HeaderPanel: градиент сделан через core QtQuick `Rectangle.gradient` (Gradient/
+#   GradientStop), без Qt5Compat.GraphicalEffects. Цвета — Theme.mainTopleftPanelColor ->
+#   Theme.leftPanelColor.
+# - Theme: tableColor (неиспользуемый) и headerGradient (мёртвый var) УДАЛЕНЫ.
+#   cardShadow — MultiEffect-тень на карточке AddPeerPage ПОДТВЕРЖДЕНА: модуль
+#   QtQuick.Effects есть в сборке (effectsplugin.dll), import корректен.
+# - LabeledInput.qml: НОВЫЙ переиспользуемый компонент (label + TextInput c типом/подсветкой
+#   активного поля). Зарегистрирован в components/qmldir. Применён в AddPeerPage вместо
+#   3× ColumnLayout+TextInput. Проверено: приложение грузится OK.
+# - utils.js: добавлен общий helper fillListModel(model, items) (clear+append), применён в
+#   PeersPage / IncomingPage / SentPage / BottomPanel вместо ручных clear+for append.
+#
+# == Заглушки (awaiting network #24) ==
+# find_peers() (bridge.py)        — print. Кнопка "Найти пир в сети Wi-Fi".
+#                                   Должна искать через UDP broadcast (#22).
+# check_status() (bridge.py)      — print. Кнопка "Проверить статус пиров".
+#                                   Должна пинговать пиров + обновлять peerStatus.
+# search_peers(query) (bridge.py) — print. Поиск по известным пирам.
+# on_user_search_peers() (core.py)— pass. Обработчик поиска.
+# on_user_send_file() (core.py)   — pass. Route через core (bridge.send_file сейчас
+#                                   вызывает transfer напрямую).
+# transfer_queue / tcp_connections — нигде не используются. Для queues при сетевой
+#                                   работе.
+#
+# == Осталось решить ==
+# - Удалены мёртвые сигналы bridge: status_changed, peerNamesChanged (не имели потребителей).
+#   ownAddressChanged ОСТАВЛЕН — это notify для свойства app.own_address (показывается в
+#   BottomPanel), хоть и не эмитится.
+# - peer_status @Property — потребитель есть: PeersPage читает app.peer_status[p.peer_id].
+# - update_peer vs apply_sync: SYNC_RESPONSE хардкодит db.add_peer вместо db.apply_sync.
+# - progress два потока: dict _transfer_progress не потокобезопасен (оба направления
+#   пишут из разных мест). Внутри Qt main thread ок, но при росте - ревью.
+#
+# == Зависит от network (#24, другие люди) ==
+# start_network(loop)         — пустой stub (строка ниже). TCP-сервер не запускается.
+# Heartbeat (#25)             — create_heartbeat() есть, but nothing sends it,
+#                               nothing marks peers offline. online_count всегда 0.
+# UDP Broadcast (#22)         — обнаружение пиров в локальной сети.
+# Bootstrap (#23)             — начальная синхронизация списка пиров при запуске.
+# last_seen (#16)             — never updated. update_last_seen существует но не вызывается.
+# DB sync (#17)               — depends on heartbeat + last_seen.
+# connection.py:14            — app.config.host у нас нет. Network пишет host по-своему.
+# =============================================================================
 
 
 def start_async_loop(loop):
@@ -28,6 +119,32 @@ def start_async_loop(loop):
 
 def start_network(loop):
     pass
+
+
+# Флаг демо-данных для отладки GUI. Поставить False для релиза.
+DEMO_DATA = True
+
+
+def seed_demo_peers(conn):
+    """Заполняет БД фейковыми пирами, чтобы их было видно в PeersPage/SendFilePage."""
+    demo_peers = [
+        {"name": "демо-Алексей", "ip": "192.168.1.50", "port": 65432},
+        {"name": "демо-Мария", "ip": "192.168.1.65", "port": 65432},
+        {"name": "демо-Сергей", "ip": "192.168.1.77", "port": 65432},
+    ]
+    for p in demo_peers:
+        db.add_peer(conn, "demo-" + p["name"], p["name"], p["ip"], p["port"])
+
+
+def show_demo_notification(hermes, bridge):
+    """Симулирует новую входящую передачу, что триггерит уведомление."""
+    meta = {
+        "filename": "demo_фото_отпуска.jpg",
+        "file_size": 2500000,
+        "chunks_count": 3,
+        "sha256": "a" * 64,
+    }
+    hermes.add_incoming_transfer(meta, "demo-демо-Мария")
 
 
 def main():
@@ -41,7 +158,7 @@ def main():
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(_root)
     os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
-    app = QGuiApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
     engine.addImportPath(os.path.dirname(os.path.abspath(__file__)))
@@ -53,7 +170,14 @@ def main():
         bridge._send_chunk_ack_async(pid, cid), asyncio_loop
     )
     hermes._on_sync_response = bridge.send_sync_response
+    hermes._on_new_incoming = lambda record: bridge.incomingTransfer.emit(
+        record["transfer_id"]
+    )
     engine.rootContext().setContextProperty("app", bridge)
+
+    if DEMO_DATA:
+        seed_demo_peers(conn)
+        QTimer.singleShot(1500, lambda: show_demo_notification(hermes, bridge))
 
     ui_dir = os.path.join(os.path.dirname(__file__), "..", "UI")
     engine.addImportPath(ui_dir)
