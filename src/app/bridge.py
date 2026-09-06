@@ -156,11 +156,12 @@ class AppBridge(QObject):
             self._transfer_progress[peer_id] = percent
             self.transferProgressChanged.emit()
 
-        connection = await connect.connect_to_peer(ip, port)
-        if not connection:
+        reader, writer = await connect.connect_to_peer(ip, port)
+        if reader is None or writer is None:
             self._mark_output_status(peer_id, "failed")
             return
 
+        connection = (reader, writer)
         ok, _ = await transfer.send_file(
             connection, file_path, peer_id, self.core, progress_callback=on_progress
         )
@@ -201,32 +202,33 @@ class AppBridge(QObject):
     async def _send_ack_async(self, peer_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
-            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if connection:
-                await transfer.send_ack(self.core.my_peer_id, connection)
+            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if reader is not None and writer is not None:
+                await transfer.send_ack(self.core.my_peer_id, (reader, writer))
 
     async def _send_reject_async(self, peer_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
-            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if connection:
-                await transfer.send_reject(self.core.my_peer_id, connection)
+            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if reader is not None and writer is not None:
+                await transfer.send_reject(self.core.my_peer_id, (reader, writer))
 
     async def _send_chunk_ack_async(self, peer_id, chunk_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
-            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if connection:
+            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if reader is not None and writer is not None:
                 ack = messages.create_ack(
                     self.core.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
                 )
-                await connect.send_message(connection[1], ack)
+                await connect.send_message(writer, ack)
 
     async def _receive_async(self, peer_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
-            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if connection:
+            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if reader is not None and writer is not None:
+                connection = (reader, writer)
                 output_dir = self._save_dir
 
                 def on_progress(percent):
@@ -242,9 +244,9 @@ class AppBridge(QObject):
     async def send_sync_response(self, peer_id, resp):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
-            connection = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if connection:
-                await connect.send_message(connection[1], resp)
+            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
+            if reader is not None and writer is not None:
+                await connect.send_message(writer, resp)
 
     def update_peer_status(self, peer_id, status):
         self.core.update_peer_status(peer_id, status)

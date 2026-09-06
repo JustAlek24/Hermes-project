@@ -54,7 +54,7 @@ async def connect_to_peer(ip, port):
         try:
             reader, writer = await asyncio.open_connection(ip, port)
         except (ConnectionRefusedError, OSError):
-            return None
+            return None, None
         _connections[key] = (reader, writer)
         return reader, writer
 
