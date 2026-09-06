@@ -73,6 +73,11 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     ok, status = await app.wait_for_ack("META", recipient_id, timeout=120)
     if not ok:
         return (False, "Отказано" if status == "REJECT" else "Адресат не отвечает")
+    # DONE-подтверждение регистрируем ДО цикла чанков: приёмник шлёт его сразу
+    # после сборки файла и может успеть раньше, чем отправитель дойдёт до этого
+    # места. Если регистрировать после цикла — подтверждение «улетит впустую»,
+    # не найдя ожидающего, и передача зависнет на «Файл не подтверждён».
+    done_key = app.register_pending("DONE", recipient_id)
     for i in range(chunks_count):
         chunk_msg = messages.create_file_chunk(
             my_peer_id, i, base64.b64encode(chunks[i]).decode()
@@ -83,10 +88,10 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
             "FILE_CHUNK", recipient_id, chunk_id=i, timeout=10
         )
         if not ok:
+            app.pending_acks.pop(done_key, None)
             return (False, f"Чанк #{i} не доставлен")
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
-    app.register_pending("DONE", recipient_id)
     ok, _ = await app.wait_for_ack("DONE", recipient_id, timeout=60)
     if not ok:
         return (False, "Файл не подтверждён")

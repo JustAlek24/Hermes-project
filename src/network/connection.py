@@ -9,6 +9,11 @@ _connections = {}
 _connection_lock = asyncio.Lock()
 logger = logging.getLogger(__name__)
 
+# Дефолтный лимит asyncio.StreamReader — 64 КБ. Строка FILE_CHUNK с чанком 1 МБ
+# в base64 занимает ~1.4 МБ и упиралась в лимит: readline() падал с
+# LimitOverrunError, обработчик соединения умирал, передача застревала на 0%.
+READER_LIMIT = 32 * 1024 * 1024
+
 
 async def start_tcp_server(port, app):
 
@@ -51,7 +56,7 @@ async def start_tcp_server(port, app):
             writer.close()
             await writer.wait_closed()
 
-    server = await asyncio.start_server(handler, host, port)
+    server = await asyncio.start_server(handler, host, port, limit=READER_LIMIT)
     async with server:
         await server.serve_forever()
 
@@ -70,7 +75,9 @@ async def connect_to_peer(ip, port, force=False):
                 return reader, writer
             del _connections[key]
         try:
-            reader, writer = await asyncio.open_connection(ip, port)
+            reader, writer = await asyncio.open_connection(
+                ip, port, limit=READER_LIMIT
+            )
         except (ConnectionRefusedError, OSError):
             return None, None
         _connections[key] = (reader, writer)
@@ -105,6 +112,9 @@ async def receive_message(reader, timeout=10):
     except asyncio.TimeoutError:
         return None
     except (ConnectionResetError, OSError):
+        return None
+    except (ValueError, asyncio.LimitOverrunError):
+        # Строка длиннее лимита — соединение в неопределённом состоянии.
         return None
 
     if not data:

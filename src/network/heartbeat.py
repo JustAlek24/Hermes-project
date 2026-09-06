@@ -1,7 +1,7 @@
 import asyncio
 
 from data.database import update_last_seen
-from network.connection import receive_message, send_message
+from network.connection import READER_LIMIT, receive_message, send_message
 from protocol.messages import create_heartbeat
 
 
@@ -14,7 +14,9 @@ async def _ping_peer(app, peer):
         # Собственное соединение, а не общий кэш connect_to_peer: heartbeat
         # закрывает сокет после каждого пинга, а передача файла живёт на том же
         # (ip, port) — закрытие переиспользуемого соединения рвало передачу.
-        reader, writer = await asyncio.open_connection(ip, port)
+        reader, writer = await asyncio.open_connection(
+            ip, port, limit=READER_LIMIT
+        )
     except (ConnectionRefusedError, OSError):
         app.update_peer_status(peer_id, "offline")
         return
