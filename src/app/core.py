@@ -14,10 +14,34 @@ class _Pending:
         self.error = False
 
 
+class Config:
+    def __init__(
+        self,
+        host="0.0.0.0",
+        port=65432,
+        udp_port=65433,
+        bootstrap_ip=None,
+        bootstrap_port=None,
+    ):
+        self.host = host
+        self.port = port
+        self.udp_port = udp_port
+        self.bootstrap_ip = bootstrap_ip
+        self.bootstrap_port = bootstrap_port
+
+
 class HermesApp:
-    def __init__(self, conn, loop=None, on_transfer_changed=None, on_chunk_ack=None):
+    def __init__(
+        self,
+        conn,
+        loop=None,
+        on_transfer_changed=None,
+        on_chunk_ack=None,
+        config=None,
+    ):
         self.db = conn
         self._loop = loop
+        self.config = config if config is not None else Config()
         self.my_peer_id = uuid.uuid4().hex
         self._peer_status = {}
         self.pending_acks = {}
@@ -28,6 +52,7 @@ class HermesApp:
         self._on_chunk_ack = on_chunk_ack
         self._on_new_incoming = None
         self._on_sync_response = None
+        self._on_peers_changed = None
 
     def parse_message(self, raw_string):
         return handler.parse_message(raw_string)
@@ -35,12 +60,28 @@ class HermesApp:
     def update_peer_status(self, peer_id, status):
         self._peer_status[peer_id] = status
         self._peer_status = dict(self._peer_status)
+        if self._on_peers_changed:
+            self._on_peers_changed()
 
     def get_status(self, peer_id):
         return self._peer_status.get(peer_id, "unknown")
 
     def get_all_status(self):
         return dict(self._peer_status)
+
+    def get_all_peers(self, conn=None):
+        return db.get_all_peers(self.db)
+
+    def on_peer_discovered(self, peer_id, ip, port):
+        if not peer_id:
+            return
+        existing = db.get_peer(self.db, peer_id)
+        if existing is None:
+            db.add_peer(self.db, peer_id, peer_id, ip, port)
+        else:
+            db.update_peer(self.db, peer_id, ip=ip, port=port)
+        db.update_last_seen(self.db, peer_id)
+        self.update_peer_status(peer_id, "online")
 
     def register_pending(self, msg_type, peer_id, chunk_id=None):
         key = (peer_id, msg_type, chunk_id)

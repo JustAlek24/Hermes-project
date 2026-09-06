@@ -27,15 +27,25 @@ Rectangle {
             statusText.text = "Ожидает"
             statusColor = Theme.statusPending
         }
+        else if (status === "sending") {
+            statusBar.width = 350
+            statusText.text = "Отправляется"
+            statusColor = Theme.statusAccepted
+        }
         else if (status === "accepted") {
             statusBar.width = 520
             statusText.text = "Передача разрешена"
             statusColor = Theme.statusAccepted
         }
-        else if (status === "done") {
+        else if (status === "completed" || status === "done") {
             statusBar.width = 350
             statusText.text = "Завершено"
             statusColor = Theme.statusDone
+        }
+        else if (status === "failed") {
+            statusBar.width = 400
+            statusText.text = "Не удалось"
+            statusColor = Theme.statusError
         }
         else if (status === "rejected") {
             statusBar.width = 520

@@ -9,10 +9,8 @@ from PySide6.QtWidgets import QFileDialog
 from app import transfer
 from data import database as db
 from network import connection as connect
-from network import get_local_ip
+from network import get_local_ip, search
 from protocol import messages
-
-DEFAULT_PORT = 65432  # !!! ПОСЛЕ СОЗДАНИЯ РАБОЧЕЙ БД - УДАЛИТЬ НАХУЙ !!!
 
 
 class AppBridge(QObject):
@@ -56,10 +54,19 @@ class AppBridge(QObject):
 
     @Slot()
     def find_peers(self):
-        print("Поиск пиров в сети...")
+        cfg = self.core.config
+        coro = search.send_discover_once(cfg.udp_port, self.core.my_peer_id, cfg.port)
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(coro, self._loop)
 
     @Slot()
     def check_status(self):
+        from network import heartbeat
+
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(
+                heartbeat.check_peers_now(self.core), self._loop
+            )
         print("Проверка статуса пиров...")
 
     @Slot(str, str, str, result=bool)
@@ -120,6 +127,10 @@ class AppBridge(QObject):
     @Slot(str)
     def search_peers(self, query):
         print(f"Поиск: {query}")
+        cfg = self.core.config
+        coro = search.send_discover_once(cfg.udp_port, self.core.my_peer_id, cfg.port)
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(coro, self._loop)
 
     @Slot(str)
     def choose_send_file(self, peer_id):
@@ -139,25 +150,29 @@ class AppBridge(QObject):
             asyncio.run_coroutine_threadsafe(coro, self._loop)
 
     async def _send_file_async(self, peer_id, ip, port, file_path):
-        connection = await connect.connect_to_peer(ip, port)
-        if not connection:
-            return
         self.add_output_transfer(file_path, peer_id)
 
         def on_progress(percent):
             self._transfer_progress[peer_id] = percent
             self.transferProgressChanged.emit()
 
+        connection = await connect.connect_to_peer(ip, port)
+        if not connection:
+            self._mark_output_status(peer_id, "failed")
+            return
+
         ok, _ = await transfer.send_file(
             connection, file_path, peer_id, self.core, progress_callback=on_progress
         )
         self._transfer_progress.pop(peer_id, None)
         self.transferProgressChanged.emit()
-        if ok:
-            for t in self.core._transfers:
-                if t["peer_id"] == peer_id and t["direction"] == "out":
-                    t["status"] = "completed"
-            self.transfersChanged.emit()
+        self._mark_output_status(peer_id, "completed" if ok else "failed")
+
+    def _mark_output_status(self, peer_id, status):
+        for t in self.core._transfers:
+            if t["peer_id"] == peer_id and t["direction"] == "out":
+                t["status"] = status
+        self.transfersChanged.emit()
 
     @Property(dict, notify=peerStatusChanged)
     def peer_status(self):
@@ -165,7 +180,7 @@ class AppBridge(QObject):
 
     @Property(str, notify=ownAddressChanged)
     def own_address(self):
-        return f"{get_local_ip()}:{DEFAULT_PORT}"
+        return f"{get_local_ip()}:{self.core.config.port}"
 
     @Property(int, notify=peerStatusChanged)
     def online_count(self):

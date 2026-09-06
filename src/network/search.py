@@ -1,11 +1,10 @@
 import asyncio
 import json
+import socket
 
 from data.database import apply_sync
 from network.connection import connect_to_peer, receive_message, send_message
 from protocol.messages import create_sync_request
-import socket
-import json
 
 BOOTSTRAP_IP = "127.0.0.1"
 BOOTSTRAP_PORT = 64352
@@ -50,13 +49,13 @@ async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn
                 )
 
             peers = response.get("data", {}).get("peers", [])
-            updated_count = apply_sync(db_conn, peers)
+            apply_sync(db_conn, peers)
 
             writer.close()
             await writer.wait_closed()
             return True
 
-        except Exception:
+        except (ConnectionError, TimeoutError, ValueError, OSError):
             if attempt == max_retries - 1:
                 return False
             await asyncio.sleep(retry_delay)
@@ -78,8 +77,21 @@ async def broadcast_discovery(port, my_peer_id, my_port, interval=5):
         sock.close()
 
 
-async def listen_broadcast(port, callback):
+async def send_discover_once(port, my_peer_id, my_port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    loop = asyncio.get_running_loop()
+    try:
+        message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
+        data = json.dumps(message).encode()
+        await loop.sock_sendto(sock, data, ("255.255.255.255", port))
+    finally:
+        sock.close()
+
+
+async def listen_broadcast(port, on_peer):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.setblocking(False)
     sock.bind(("0.0.0.0", port))
     loop = asyncio.get_running_loop()
@@ -90,8 +102,11 @@ async def listen_broadcast(port, callback):
                 message = json.loads(data)
             except ValueError:
                 continue
-            if message.get("type") == "DISCOVER":
-                await callback(message.get("peer_id"), addr[0], message.get("port"))
+            mtype = message.get("type")
+            if mtype in {"DISCOVER", "ANNOUNCE"}:
+                await on_peer(
+                    message.get("peer_id"), addr[0], message.get("port"), mtype
+                )
     finally:
         sock.close()
 
@@ -106,3 +121,16 @@ async def announce_on_discover(discover_message, addr, my_peer_id, my_port):
         await loop.sock_sendto(sock, data, addr)
     finally:
         sock.close()
+
+
+def make_discovery_callback(app):
+    async def _on_peer(peer_id, ip, port, mtype):
+        if not peer_id or peer_id == app.my_peer_id:
+            return
+        app.on_peer_discovered(peer_id, ip, port)
+        if mtype == "DISCOVER":
+            await announce_on_discover(
+                None, (ip, app.config.udp_port), app.my_peer_id, app.config.port
+            )
+
+    return _on_peer
