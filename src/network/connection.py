@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 
+from protocol import messages as messages_mod
 from protocol.handler import handle_message
 
 _connections = {}
@@ -33,6 +34,14 @@ async def start_tcp_server(port, app):
                     handle_message(parsed_message, app)
                 except Exception:
                     logger.exception("Ошибка при обработке сообщения")
+                if parsed_message.get("type") == "HEARTBEAT":
+                    try:
+                        reply = messages_mod.create_message(
+                            "HEARTBEAT", app.my_peer_id
+                        )
+                        await send_message(writer, reply)
+                    except Exception:
+                        logger.exception("Ошибка при отправке ответа на heartbeat")
         finally:
             writer.close()
             await writer.wait_closed()
