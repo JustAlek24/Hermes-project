@@ -5,6 +5,7 @@ import os
 from hashlib import sha256
 
 from network import connection as connect
+from protocol import handler
 from protocol import messages
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,31 @@ def put_chunk(peer_id, chunk_id, content):
         buf["queue"].put_nowait((chunk_id, content))
 
 
+async def _read_replies(reader, app, peer_id):
+    """Читает ответы отправитель/получатель — ACK/REJECT/ERROR из исходящего
+    сокета и передаёт их в общий контур обработки. Так отправителю не нужен
+    обратный TCP-дозвон от получателя: подтверждения возвращаются по тому же
+    соединению, которое сам отправитель и открыл."""
+    while True:
+        raw = await connect.receive_message(reader, timeout=None)
+        if raw is None:
+            return
+        try:
+            parsed = app.parse_message(raw)
+        except Exception:
+            continue
+        if not isinstance(parsed, dict) or parsed.get("error"):
+            continue
+        try:
+            handler.handle_message(parsed, app)
+        except Exception:
+            logger.exception(
+                "Ошибка при обработке ответа peer=%s", str(peer_id)[:8]
+            )
+
+
 async def send_file(connection, filepath, recipient_id, app, progress_callback=None):
+    reader, writer = connection
     chunks, file_sha = chunk_file(filepath)
     my_peer_id = app.my_peer_id
     filename = os.path.basename(filepath)
@@ -113,7 +138,7 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     return (True, None)
 
 
-async def recive_files(peer_id, connection, app, output_dir, progress_callback=None):
+async def recive_files(peer_id, writer, app, output_dir, progress_callback=None):
     # Дата приходить либо напрямую (HermesApp), либо через мост (AppBridge у
     # которого реальный контур лежит в .core). В мост нет ни my_peer_id, ни
     # update_transfer_status — без этого DONE-подтверждение не ушло бы и
@@ -146,14 +171,14 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
 
     if ok:
         await connect.send_message(
-            connection[1], messages.create_ack(core.my_peer_id, "DONE")
+            writer, messages.create_ack(core.my_peer_id, "DONE")
         )
         logger.info("RECV_DONE_OK file=%s peer=%s", filename, str(peer_id)[:8])
         core.update_transfer_status(peer_id, "completed")
         return (True, output_path)
     else:
         await connect.send_message(
-            connection[1],
+            writer,
             messages.create_error(
                 core.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"
             ),
@@ -163,11 +188,11 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
         return (False, "SHA256 не совпадает")
 
 
-async def send_ack(my_peer_id, connection):
+async def send_ack(my_peer_id, writer):
     ack = messages.create_ack(my_peer_id, "META")
-    await connect.send_message(connection[1], ack)
+    await connect.send_message(writer, ack)
 
 
-async def send_reject(my_peer_id, connection):
+async def send_reject(my_peer_id, writer):
     rej = messages.create_reject(my_peer_id)
-    await connect.send_message(connection[1], rej)
+    await connect.send_message(writer, rej)

@@ -7,6 +7,7 @@ from protocol.handler import handle_message
 
 _connections = {}
 _connection_lock = asyncio.Lock()
+_in_connections = {}  # peer_id → writer сокета, с которого этот пир шлёт файл
 logger = logging.getLogger(__name__)
 
 # Дефолтный лимит asyncio.StreamReader — 64 КБ. Строка FILE_CHUNK с чанком 1 МБ
@@ -22,6 +23,7 @@ async def start_tcp_server(port, app):
     async def handler(reader, writer):
         addr = writer.get_extra_info("peername")
         sender_ip = addr[0] if addr else "unknown"
+        peer_id = None
         print(f"Подключился клиент: {addr}")
 
         try:
@@ -40,9 +42,19 @@ async def start_tcp_server(port, app):
                     continue
                 if not isinstance(parsed_message, dict) or parsed_message.get("error"):
                     continue
+                msg_type = parsed_message.get("type")
+                # Подтверждения (META/FILE_CHUNK/DONE) шлём получателю обратно по
+                # этому же сокету, с которого пришли META/чанки. Обратный дозвон
+                # к отправителю (connect_to_peer) рвался фаерволом, и отправитель
+                # навсегда зависал на ожидании подтверждения. Heartbeat мы не
+                # учитываем: он приходит по отдельному временному сокету и
+                # перезаписал бы рабочий канал передачи.
+                if msg_type in ("META", "FILE_CHUNK"):
+                    peer_id = parsed_message["peer_id"]
+                    _in_connections[peer_id] = writer
                 logger.info(
                     "RECV type=%s peer=%s from=%s size=%d",
-                    parsed_message.get("type"),
+                    msg_type,
                     str(parsed_message.get("peer_id"))[:8],
                     sender_ip,
                     len(raw_message),
@@ -51,7 +63,7 @@ async def start_tcp_server(port, app):
                     handle_message(parsed_message, app, sender_ip=sender_ip, writer=writer)
                 except Exception:
                     logger.exception("Ошибка при обработке сообщения")
-                if parsed_message.get("type") == "HEARTBEAT":
+                if msg_type == "HEARTBEAT":
                     try:
                         reply = messages_mod.create_message(
                             "HEARTBEAT", app.my_peer_id
@@ -60,6 +72,8 @@ async def start_tcp_server(port, app):
                     except Exception:
                         logger.exception("Ошибка при отправке ответа на heartbeat")
         finally:
+            if peer_id and _in_connections.get(peer_id) is writer:
+                _in_connections.pop(peer_id, None)
             writer.close()
             await writer.wait_closed()
 

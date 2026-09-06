@@ -306,6 +306,9 @@ class AppBridge(QObject):
         def on_progress(percent):
             self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
+        def on_progress(percent):
+            self._transfer_progress[transfer_id] = percent
+            self.transferProgressChanged.emit()
 
         ok, reason = await transfer.recive_files(
             peer_id, connection, self, output_dir, progress_callback=on_progress
