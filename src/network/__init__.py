@@ -66,3 +66,15 @@ def get_local_ip():
     except OSError:
         pass
     return "127.0.0.1"
+
+
+def ip_equals_self(ip):
+    """Проверяет, принадлежит ли ip этой машине (включая все интерфейсы)."""
+    if not ip:
+        return False
+    if ip.startswith("127."):
+        return True
+    for _iface, local_ip in get_local_ips():
+        if ip == local_ip:
+            return True
+    return False

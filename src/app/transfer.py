@@ -57,7 +57,9 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     filename = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
     chunks_count = len(chunks)
-    meta = messages.create_meta(my_peer_id, filename, file_size, chunks_count, file_sha)
+    meta = messages.create_meta(
+        my_peer_id, filename, file_size, chunks_count, file_sha, app.config.port
+    )
     app.register_pending("META", recipient_id)
     await connect.send_message(connection[1], meta)
     ok, status = await app.wait_for_ack("META", recipient_id, timeout=10)

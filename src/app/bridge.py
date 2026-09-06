@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QFileDialog
 from app import transfer
 from data import database as db
 from network import connection as connect
-from network import get_local_ip, search
+from network import get_local_ip, ip_equals_self, search
 from protocol import messages
 
 
@@ -144,6 +144,9 @@ class AppBridge(QObject):
     def send_file(self, peer_id, file_path):
         peer = db.get_peer(self.core.db, peer_id)
         if not peer:
+            return
+        if ip_equals_self(peer["ip"]):
+            print("Нельзя отправить файл самому себе")
             return
         coro = self._send_file_async(peer_id, peer["ip"], peer["port"], file_path)
         if self._loop:

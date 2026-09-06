@@ -16,6 +16,7 @@ async def start_tcp_server(port, app):
 
     async def handler(reader, writer):
         addr = writer.get_extra_info("peername")
+        sender_ip = addr[0] if addr else "unknown"
         print(f"Подключился клиент: {addr}")
 
         try:
@@ -31,7 +32,7 @@ async def start_tcp_server(port, app):
                 if not isinstance(parsed_message, dict) or parsed_message.get("error"):
                     continue
                 try:
-                    handle_message(parsed_message, app)
+                    handle_message(parsed_message, app, sender_ip=sender_ip)
                 except Exception:
                     logger.exception("Ошибка при обработке сообщения")
                 if parsed_message.get("type") == "HEARTBEAT":

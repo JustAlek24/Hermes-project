@@ -53,6 +53,7 @@ class HermesApp:
         self._on_new_incoming = None
         self._on_sync_response = None
         self._on_peers_changed = None
+        self._on_peer_status_changed = None
 
     def parse_message(self, raw_string):
         return handler.parse_message(raw_string)
@@ -62,6 +63,8 @@ class HermesApp:
         self._peer_status = dict(self._peer_status)
         if self._on_peers_changed:
             self._on_peers_changed()
+        if self._on_peer_status_changed:
+            self._on_peer_status_changed()
 
     def get_status(self, peer_id):
         return self._peer_status.get(peer_id, "unknown")

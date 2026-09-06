@@ -20,12 +20,13 @@ def create_heartbeat(peer_id):
     return create_message("HEARTBEAT", peer_id)
 
 
-def create_meta(peer_id, filename, file_size, chunks_count, sha256):
+def create_meta(peer_id, filename, file_size, chunks_count, sha256, port=None):
     data = {
         "filename": filename,
         "file_size": file_size,
         "chunks_count": chunks_count,
         "sha256": sha256,
+        "port": port,
     }
     return create_message("META", peer_id, data)
 

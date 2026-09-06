@@ -113,6 +113,7 @@ def main():
         record["transfer_id"]
     )
     hermes._on_peers_changed = bridge.peersChanged.emit
+    hermes._on_peer_status_changed = bridge.peerStatusChanged.emit
     engine.rootContext().setContextProperty("app", bridge)
 
     start_network(hermes, asyncio_loop)
