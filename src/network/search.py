@@ -1,5 +1,4 @@
 import asyncio
-import ipaddress
 import json
 import socket
 
@@ -32,7 +31,7 @@ async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn
             else:
                 last_sync = 0
 
-            sync_request_dict = json.loads(create_sync_request(my_peer_id, last_sync))
+            sync_request_dict = create_sync_request(my_peer_id, last_sync)
             success = await send_message(writer, sync_request_dict)
 
             if not success:
