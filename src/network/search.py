@@ -1,8 +1,10 @@
 import asyncio
+import ipaddress
 import json
 import socket
 
 from data.database import apply_sync
+from network import get_local_ips
 from network.connection import connect_to_peer, receive_message, send_message
 from protocol.messages import create_sync_request
 
@@ -61,32 +63,53 @@ async def connect_to_bootstrap(bootstrap_ip, bootstrap_port, my_peer_id, db_conn
             await asyncio.sleep(retry_delay)
 
 
+def _broadcast_targets(port):
+    """Возвращает список (bind_ip, target) для отправки broadcast на каждый
+    LAN-интерфейс. Привязка сокета к конкретному интерфейсу гарантирует,
+    что broadcast уйдёт в нужную подсеть (проводную и WiFi)."""
+    targets = []
+    for _iface, ip in get_local_ips():
+        targets.append((ip, ("255.255.255.255", port)))
+    if not targets:
+        targets.append((None, ("255.255.255.255", port)))
+    return targets
+
+
 async def broadcast_discovery(port, my_peer_id, my_port, interval=5):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.setblocking(False)
     loop = asyncio.get_running_loop()
     try:
         while True:
             message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
             data = json.dumps(message).encode()
-            addr = ("255.255.255.255", port)
-            await loop.sock_sendto(sock, data, addr)
+            for bind_ip, addr in _broadcast_targets(port):
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                sock.setblocking(False)
+                try:
+                    if bind_ip:
+                        sock.bind((bind_ip, 0))
+                    await loop.sock_sendto(sock, data, addr)
+                finally:
+                    sock.close()
             await asyncio.sleep(interval)
-    finally:
-        sock.close()
+    except asyncio.CancelledError:
+        raise
 
 
 async def send_discover_once(port, my_peer_id, my_port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     loop = asyncio.get_running_loop()
-    try:
-        message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
-        data = json.dumps(message).encode()
-        await loop.sock_sendto(sock, data, ("255.255.255.255", port))
-    finally:
-        sock.close()
+    message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
+    data = json.dumps(message).encode()
+    for bind_ip, addr in _broadcast_targets(port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.setblocking(False)
+        try:
+            if bind_ip:
+                sock.bind((bind_ip, 0))
+            await loop.sock_sendto(sock, data, addr)
+        finally:
+            sock.close()
 
 
 async def listen_broadcast(port, on_peer):
