@@ -49,6 +49,7 @@ class AppBridge(QObject):
         self.core._transfers.insert(0, transfer_record)
         self.core._transfers = list(self.core._transfers)
         self.transfersChanged.emit()
+        return transfer_record["transfer_id"]
 
     def new_peer_connected(self, name):
         self.new_peer.emit(name)
@@ -119,7 +120,7 @@ class AppBridge(QObject):
             if t["transfer_id"] == transfer_id:
                 t["status"] = "accepted"
                 coro1 = self._send_ack_async(t["peer_id"])
-                coro2 = self._receive_async(t["peer_id"])
+                coro2 = self._receive_async(t["peer_id"], transfer_id)
                 if self._loop:
                     asyncio.run_coroutine_threadsafe(coro1, self._loop)
                     asyncio.run_coroutine_threadsafe(coro2, self._loop)
@@ -178,28 +179,28 @@ class AppBridge(QObject):
             asyncio.run_coroutine_threadsafe(coro, self._loop)
 
     async def _send_file_async(self, peer_id, ip, port, file_path):
-        self.add_output_transfer(file_path, peer_id)
+        transfer_id = self.add_output_transfer(file_path, peer_id)
 
         def on_progress(percent):
-            self._transfer_progress[peer_id] = percent
+            self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
 
         reader, writer = await connect.connect_to_peer(ip, port)
         if reader is None or writer is None:
-            self._mark_output_status(peer_id, "failed")
+            self._mark_output_status(transfer_id, "failed")
             return
 
         connection = (reader, writer)
         ok, _ = await transfer.send_file(
             connection, file_path, peer_id, self.core, progress_callback=on_progress
         )
-        self._transfer_progress.pop(peer_id, None)
+        self._transfer_progress.pop(transfer_id, None)
         self.transferProgressChanged.emit()
-        self._mark_output_status(peer_id, "completed" if ok else "failed")
+        self._mark_output_status(transfer_id, "completed" if ok else "failed")
 
-    def _mark_output_status(self, peer_id, status):
+    def _mark_output_status(self, transfer_id, status):
         for t in self.core._transfers:
-            if t["peer_id"] == peer_id and t["direction"] == "out":
+            if t["transfer_id"] == transfer_id and t["direction"] == "out":
                 t["status"] = status
         self.transfersChanged.emit()
 
@@ -251,7 +252,7 @@ class AppBridge(QObject):
                 )
                 await connect.send_message(writer, ack)
 
-    async def _receive_async(self, peer_id):
+    async def _receive_async(self, peer_id, transfer_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
             reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
@@ -260,13 +261,13 @@ class AppBridge(QObject):
                 output_dir = self._save_dir
 
                 def on_progress(percent):
-                    self._transfer_progress[peer_id] = percent
+                    self._transfer_progress[transfer_id] = percent
                     self.transferProgressChanged.emit()
 
                 _, _ = await transfer.recive_files(
                     peer_id, connection, self, output_dir, progress_callback=on_progress
                 )
-                self._transfer_progress.pop(peer_id, None)
+                self._transfer_progress.pop(transfer_id, None)
                 self.transferProgressChanged.emit()
 
     async def send_sync_response(self, peer_id, resp):

@@ -8,3 +8,4 @@ StatusIndicator StatusIndicator.qml
 InfoRow InfoRow.qml
 NotificationBanner NotificationBanner.qml
 LabeledInput LabeledInput.qml
+CustomProgressBar CustomProgressBar.qml

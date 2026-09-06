@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
+import components
 import Theme
 import "../utils.js" as Utils
 
@@ -57,18 +57,23 @@ Rectangle {
             color: Theme.textColor
         }
 
-        ProgressBar {
+        CustomProgressBar {
             id: activeProgress
             Layout.fillWidth: true
+            Layout.preferredHeight: 18
             Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: 20
             Layout.rightMargin: 15
             visible: app.transfers.length > 0
             value: {
                 var progress = app.transfer_progress
                 var keys = Object.keys(progress)
-                if (keys.length > 0)
-                    return progress[keys[0]] / 100
-                return 0
+                if (keys.length === 0)
+                    return 0
+                var maxPct = 0
+                for (var k of keys)
+                    maxPct = Math.max(maxPct, progress[k] / 100)
+                return maxPct
             }
         }
         Text {
@@ -152,11 +157,13 @@ Rectangle {
                             color: Theme.textSecondaryColor
                         }
                     }
-                    ProgressBar {
+                    CustomProgressBar {
                         id: rowProgress
                         Layout.fillWidth: true
-                        value: 0
-                        visible: model.status === "sending" || model.status === "receiving"
+                        Layout.preferredHeight: 10
+                        visible: model.status === "sending" || model.status === "receiving" || model.status === "accepted"
+                        value: app.transfer_progress[model.transferId] !== undefined
+                               ? app.transfer_progress[model.transferId] / 100 : 0
                     }
                     Text {
                         text: "SHA256: " + model.sha256
@@ -186,6 +193,7 @@ Rectangle {
         var items = []
         for (var t of app.transfers) {
             items.push({
+                transferId: t.transfer_id,
                 direction: t.direction,
                 peerName: t.peer_name,
                 filename: t.filename,
