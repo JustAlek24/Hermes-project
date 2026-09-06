@@ -5,7 +5,6 @@ import os
 from hashlib import sha256
 
 from network import connection as connect
-from protocol import handler
 from protocol import messages
 
 logger = logging.getLogger(__name__)
@@ -55,31 +54,8 @@ def put_chunk(peer_id, chunk_id, content):
         buf["queue"].put_nowait((chunk_id, content))
 
 
-async def _read_replies(reader, app, peer_id):
-    """Читает ответы отправитель/получатель — ACK/REJECT/ERROR из исходящего
-    сокета и передаёт их в общий контур обработки. Так отправителю не нужен
-    обратный TCP-дозвон от получателя: подтверждения возвращаются по тому же
-    соединению, которое сам отправитель и открыл."""
-    while True:
-        raw = await connect.receive_message(reader, timeout=None)
-        if raw is None:
-            return
-        try:
-            parsed = app.parse_message(raw)
-        except Exception:
-            continue
-        if not isinstance(parsed, dict) or parsed.get("error"):
-            continue
-        try:
-            handler.handle_message(parsed, app)
-        except Exception:
-            logger.exception(
-                "Ошибка при обработке ответа peer=%s", str(peer_id)[:8]
-            )
-
-
 async def send_file(connection, filepath, recipient_id, app, progress_callback=None):
-    reader, writer = connection
+    reader = connection[0]
     chunks, file_sha = chunk_file(filepath)
     my_peer_id = app.my_peer_id
     filename = os.path.basename(filepath)
@@ -98,7 +74,6 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     # Ответы пира (ACK/REJECT/ERROR) приходят по тому же сокету, в который мы
     # пишем файл. Слушаем его в фоне — иначе ACK-и никто не обработает и
     # отправка зависнет на ожидании подтверждения META / чанков / DONE.
-    reader = connection[0]
     if id(reader) not in app._outbound_readers or app._outbound_readers[id(reader)].done():
         app._outbound_readers[id(reader)] = asyncio.create_task(
             connect.read_outgoing_stream(reader, app, writer=connection[1])

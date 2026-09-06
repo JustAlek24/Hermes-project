@@ -123,9 +123,9 @@ class AppBridge(QObject):
             if t["transfer_id"] == transfer_id:
                 t["status"] = "accepted"
                 logger.info("ACCEPT transfer=%s peer=%s", str(transfer_id)[:8], str(t["peer_id"])[:8])
-                connection = self._get_incoming_connection(t["peer_id"])
-                coro1 = self._send_ack_async(t["peer_id"], connection)
-                coro2 = self._receive_async(t["peer_id"], transfer_id, connection)
+                writer = self._get_incoming_writer(t["peer_id"])
+                coro1 = self._send_ack_async(t["peer_id"], writer)
+                coro2 = self._receive_async(t["peer_id"], transfer_id, writer)
                 if self._loop:
                     asyncio.run_coroutine_threadsafe(coro1, self._loop)
                     asyncio.run_coroutine_threadsafe(coro2, self._loop)
@@ -148,8 +148,8 @@ class AppBridge(QObject):
         for t in self.core._transfers:
             if t["transfer_id"] == transfer_id:
                 t["status"] = "rejected"
-                connection = self._get_incoming_connection(t["peer_id"])
-                coro = self._send_reject_async(t["peer_id"], connection)
+                writer = self._get_incoming_writer(t["peer_id"])
+                coro = self._send_reject_async(t["peer_id"], writer)
                 if self._loop:
                     asyncio.run_coroutine_threadsafe(coro, self._loop)
                 self.transfersChanged.emit()
@@ -244,55 +244,55 @@ class AppBridge(QObject):
 
     async def _dial_peer(self, peer_id):
         """Открывает подключение к пиру (запасной путь, если входящего
-        сокета, на котором пришёл META, уже нет)."""
+        сокета, на котором пришёл META, уже нет). Возвращает writer."""
         peer = db.get_peer(self.core.db, peer_id)
         if not peer:
             return None
         reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
         if reader is None or writer is None:
             return None
-        return (reader, writer)
+        return writer
 
-    def _get_incoming_connection(self, peer_id):
-        """Возвращает (reader, writer) сокета, на котором пришёл META, чтобы
-        отвечать отправителю по тому же соединению (без встречного подключения,
-        которое не проходит за NAT/файрволом)."""
+    def _get_incoming_writer(self, peer_id):
+        """Возвращает writer сокета, на котором пришёл META, чтобы отвечать
+        отправителю по тому же соединению (без встречного подключения, которое
+        не проходит за NAT/файрволом)."""
         writer = self.core._incoming_connections.get(peer_id)
         if writer is not None and not writer.is_closing():
-            return (None, writer)
+            return writer
         self.core._incoming_connections.pop(peer_id, None)
         return None
 
-    async def _send_ack_async(self, peer_id, connection=None):
-        if connection is None:
-            connection = await self._dial_peer(peer_id)
-        if connection is not None and not connection[1].is_closing():
-            await transfer.send_ack(self.core.my_peer_id, connection)
+    async def _send_ack_async(self, peer_id, writer=None):
+        if writer is None:
+            writer = await self._dial_peer(peer_id)
+        if writer is not None and not writer.is_closing():
+            await transfer.send_ack(self.core.my_peer_id, writer)
 
-    async def _send_reject_async(self, peer_id, connection=None):
-        if connection is None:
-            connection = await self._dial_peer(peer_id)
-        if connection is not None and not connection[1].is_closing():
-            await transfer.send_reject(self.core.my_peer_id, connection)
+    async def _send_reject_async(self, peer_id, writer=None):
+        if writer is None:
+            writer = await self._dial_peer(peer_id)
+        if writer is not None and not writer.is_closing():
+            await transfer.send_reject(self.core.my_peer_id, writer)
 
     async def _send_chunk_ack_async(self, peer_id, chunk_id):
-        connection = self._get_incoming_connection(peer_id)
-        if connection is None:
-            connection = await self._dial_peer(peer_id)
-        if connection is not None and not connection[1].is_closing():
+        writer = self._get_incoming_writer(peer_id)
+        if writer is None:
+            writer = await self._dial_peer(peer_id)
+        if writer is not None and not writer.is_closing():
             ack = messages.create_ack(
                 self.core.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
             )
-            ok = await connect.send_message(connection[1], ack)
+            ok = await connect.send_message(writer, ack)
             if not ok:
                 logger.warning("CHUNK_ACK_SEND_FAILED peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
         else:
             logger.warning("CHUNK_ACK no connection peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
 
-    async def _receive_async(self, peer_id, transfer_id, connection=None):
-        if connection is None:
-            connection = await self._dial_peer(peer_id)
-        if connection is None:
+    async def _receive_async(self, peer_id, transfer_id, writer=None):
+        if writer is None:
+            writer = await self._dial_peer(peer_id)
+        if writer is None:
             peer = db.get_peer(self.core.db, peer_id)
             logger.error(
                 "RECV_CONNECT_FAILED ip=%s port=%s",
@@ -306,12 +306,9 @@ class AppBridge(QObject):
         def on_progress(percent):
             self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
-        def on_progress(percent):
-            self._transfer_progress[transfer_id] = percent
-            self.transferProgressChanged.emit()
 
         ok, reason = await transfer.recive_files(
-            peer_id, connection, self, output_dir, progress_callback=on_progress
+            peer_id, writer, self, output_dir, progress_callback=on_progress
         )
         logger.info("RECV_DONE ok=%s reason=%s", ok, reason)
         self._transfer_progress.pop(transfer_id, None)

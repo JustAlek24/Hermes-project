@@ -37,7 +37,10 @@ async def _ping_peer(app, peer):
             app.update_peer_status(peer_id, "offline")
     finally:
         writer.close()
-        await writer.wait_closed()
+        try:
+            await writer.wait_closed()
+        except (ConnectionResetError, OSError):
+            pass
 
 
 async def check_peers_now(app):

@@ -7,7 +7,6 @@ from protocol.handler import handle_message
 
 _connections = {}
 _connection_lock = asyncio.Lock()
-_in_connections = {}  # peer_id → writer сокета, с которого этот пир шлёт файл
 logger = logging.getLogger(__name__)
 
 # Дефолтный лимит asyncio.StreamReader — 64 КБ. Строка FILE_CHUNK с чанком 1 МБ
@@ -48,10 +47,10 @@ async def start_tcp_server(port, app):
                 # к отправителю (connect_to_peer) рвался фаерволом, и отправитель
                 # навсегда зависал на ожидании подтверждения. Heartbeat мы не
                 # учитываем: он приходит по отдельному временному сокету и
-                # перезаписал бы рабочий канал передачи.
+                # перезаписал бы рабочий канал передачи. Рабочий канал хранится
+                # в app._incoming_connections (см. protocol/handler.py, META).
                 if msg_type in ("META", "FILE_CHUNK"):
                     peer_id = parsed_message["peer_id"]
-                    _in_connections[peer_id] = writer
                 logger.info(
                     "RECV type=%s peer=%s from=%s size=%d",
                     msg_type,
@@ -72,10 +71,16 @@ async def start_tcp_server(port, app):
                     except Exception:
                         logger.exception("Ошибка при отправке ответа на heartbeat")
         finally:
-            if peer_id and _in_connections.get(peer_id) is writer:
-                _in_connections.pop(peer_id, None)
+            if peer_id and app._incoming_connections.get(peer_id) is writer:
+                app._incoming_connections.pop(peer_id, None)
             writer.close()
-            await writer.wait_closed()
+            try:
+                await writer.wait_closed()
+            except (ConnectionResetError, OSError):
+                # Пир оборвал сокет (WinError 64/10053/10054) — ждать закрытия
+                # уже не нужно, а непойманная ошибка засоряла лог как
+                # «Unhandled exception in event loop».
+                pass
 
     server = await asyncio.start_server(handler, host, port, limit=READER_LIMIT)
     async with server:

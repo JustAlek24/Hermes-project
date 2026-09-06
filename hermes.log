@@ -291,3 +291,15 @@ ConnectionResetError: [WinError 64] Указанное сетевое имя б�
 2026-09-07 00:36:30,788 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
 2026-09-07 00:37:53,928 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
 2026-09-07 00:39:17,061 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:42:00,433 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:42:03,214 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-07 00:42:15,457 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-07 00:42:22,481 INFO [app.bridge] ACCEPT transfer=5d857799 peer=6c246a86
+2026-09-07 00:42:22,482 ERROR [network.connection] Не удалось отправить сообщение
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 143, in send_message
+    if writer.is_closing():
+       ^^^^^^^^^^^^^^^^^
+AttributeError: 'tuple' object has no attribute 'is_closing'
+2026-09-07 00:42:22,484 INFO [app.bridge] RECV_START peer=6c246a86 transfer=5d857799 save_dir=C:/Users/User-PC/Downloads
+2026-09-07 00:42:22,484 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=6c246a86
