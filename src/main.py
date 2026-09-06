@@ -1,7 +1,15 @@
 import asyncio
+import logging
 import os
 import sys
 import threading
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    handlers=[logging.FileHandler("hermes.log", mode="a", encoding="utf-8")]
+    + ([logging.StreamHandler(sys.stderr)] if sys.stderr else []),
+)
 
 _pyside6_dir = os.path.join(
     os.path.dirname(__file__), "..", ".venv", "Lib", "site-packages", "PySide6"
@@ -63,9 +71,18 @@ def start_network(app, loop):
         )
 
 
+def loop_exception_handler(loop, context):
+    logging.getLogger("asyncio").error(
+        "Unhandled exception in event loop: %s",
+        context.get("exception") or context.get("message"),
+        exc_info=context.get("exception"),
+    )
+
+
 def main():
     conn = db.init_db()
     asyncio_loop = asyncio.new_event_loop()
+    asyncio_loop.set_exception_handler(loop_exception_handler)
     thread = threading.Thread(
         target=start_async_loop, args=(asyncio_loop,), daemon=True
     )

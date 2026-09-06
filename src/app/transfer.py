@@ -1,10 +1,13 @@
 import asyncio
 import base64
+import logging
 import os
 from hashlib import sha256
 
 from network import connection as connect
 from protocol import messages
+
+logger = logging.getLogger(__name__)
 
 _receive_buffers = {}  # peer_id → {"chunks": {}, "queue": asyncio.Queue, "meta": dict}
 
@@ -57,6 +60,7 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     filename = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
     chunks_count = len(chunks)
+    logger.info("SEND_START file=%s chunks=%d size=%d recipient=%s", filename, chunks_count, file_size, str(recipient_id)[:8])
     meta = messages.create_meta(
         my_peer_id,
         app.my_peer_name,
@@ -89,12 +93,15 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         )
         if not ok:
             app.pending_acks.pop(done_key, None)
+            logger.warning("CHUNK_FAILED chunk=%d recipient=%s", i, str(recipient_id)[:8])
             return (False, f"Чанк #{i} не доставлен")
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
     ok, _ = await app.wait_for_ack("DONE", recipient_id, timeout=60)
     if not ok:
+        logger.warning("DONE_NOT_ACKED recipient=%s", str(recipient_id)[:8])
         return (False, "Файл не подтверждён")
+    logger.info("SEND_DONE_OK recipient=%s", str(recipient_id)[:8])
     return (True, None)
 
 
@@ -106,6 +113,7 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
     core = getattr(app, "core", app)
     buf = _receive_buffers.get(peer_id)
     if not buf:
+        logger.warning("RECV_BUFFER_MISSING peer=%s", str(peer_id)[:8])
         return (False, "Буфер не инициализирован")
 
     meta = buf["meta"]
@@ -113,6 +121,7 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
     chunks_count = meta["chunks_count"]
     expected_sha = meta["sha256"]
     filename = meta["filename"]
+    logger.info("RECV_START file=%s chunks=%d peer=%s", filename, chunks_count, str(peer_id)[:8])
 
     chunks = {}
     for i in range(chunks_count):
@@ -131,6 +140,7 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
         await connect.send_message(
             connection[1], messages.create_ack(core.my_peer_id, "DONE")
         )
+        logger.info("RECV_DONE_OK file=%s peer=%s", filename, str(peer_id)[:8])
         core.update_transfer_status(peer_id, "completed")
         return (True, output_path)
     else:
@@ -140,6 +150,7 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
                 core.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"
             ),
         )
+        logger.warning("RECV_CHECKSUM_MISMATCH file=%s peer=%s", filename, str(peer_id)[:8])
         core.update_transfer_status(peer_id, "error")
         return (False, "SHA256 не совпадает")
 

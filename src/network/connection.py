@@ -40,6 +40,13 @@ async def start_tcp_server(port, app):
                     continue
                 if not isinstance(parsed_message, dict) or parsed_message.get("error"):
                     continue
+                logger.info(
+                    "RECV type=%s peer=%s from=%s size=%d",
+                    parsed_message.get("type"),
+                    str(parsed_message.get("peer_id"))[:8],
+                    sender_ip,
+                    len(raw_message),
+                )
                 try:
                     handle_message(parsed_message, app, sender_ip=sender_ip)
                 except Exception:
@@ -85,11 +92,10 @@ async def connect_to_peer(ip, port, force=False):
 
 
 async def send_message(writer, message_json):
-
     try:
         if writer.is_closing():
             return False
-
+        logger.debug("SEND type=%s peer=%s", message_json.get("type"), str(message_json.get("peer_id"))[:8])
         json_line = json.dumps(message_json, ensure_ascii=False)
         data = (json_line + "\n").encode("utf-8")
 

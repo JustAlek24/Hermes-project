@@ -1,7 +1,10 @@
 import asyncio
+import logging
 import os
 import time
 import uuid
+
+logger = logging.getLogger(__name__)
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
 from PySide6.QtWidgets import QFileDialog
@@ -119,6 +122,7 @@ class AppBridge(QObject):
         for t in self.core._transfers:
             if t["transfer_id"] == transfer_id:
                 t["status"] = "accepted"
+                logger.info("ACCEPT transfer=%s peer=%s", str(transfer_id)[:8], str(t["peer_id"])[:8])
                 coro1 = self._send_ack_async(t["peer_id"])
                 coro2 = self._receive_async(t["peer_id"], transfer_id)
                 if self._loop:
@@ -126,6 +130,7 @@ class AppBridge(QObject):
                     asyncio.run_coroutine_threadsafe(coro2, self._loop)
                 self.transfersChanged.emit()
                 return
+        logger.warning("ACCEPT transfer not found id=%s", str(transfer_id)[:8])
 
     @Slot(result=str)
     def choose_save_dir(self):
@@ -170,13 +175,18 @@ class AppBridge(QObject):
     def send_file(self, peer_id, file_path):
         peer = db.get_peer(self.core.db, peer_id)
         if not peer:
+            logger.warning("SEND_ABORT peer not found id=%s", str(peer_id)[:8])
             return
         if ip_equals_self(peer["ip"]):
+            logger.warning("SEND_ABORT ip belongs to self ip=%s", peer["ip"])
             print("Нельзя отправить файл самому себе")
             return
+        logger.info("SEND_REQUEST peer=%s ip=%s port=%s file=%s", str(peer_id)[:8], peer["ip"], peer["port"], file_path)
         coro = self._send_file_async(peer_id, peer["ip"], peer["port"], file_path)
         if self._loop:
             asyncio.run_coroutine_threadsafe(coro, self._loop)
+        else:
+            logger.error("SEND_ABORT no event loop")
 
     async def _send_file_async(self, peer_id, ip, port, file_path):
         transfer_id = self.add_output_transfer(file_path, peer_id)
@@ -187,15 +197,17 @@ class AppBridge(QObject):
 
         reader, writer = await connect.connect_to_peer(ip, port)
         if reader is None or writer is None:
+            logger.error("SEND_CONNECT_FAILED ip=%s port=%s", ip, port)
             self._mark_output_status(transfer_id, "failed")
             return
 
         connection = (reader, writer)
-        ok, _ = await transfer.send_file(
+        ok, reason = await transfer.send_file(
             connection, file_path, peer_id, self.core, progress_callback=on_progress
         )
         self._transfer_progress.pop(transfer_id, None)
         self.transferProgressChanged.emit()
+        logger.info("SEND_DONE ok=%s reason=%s transfer=%s", ok, reason, str(transfer_id)[:8])
         self._mark_output_status(transfer_id, "completed" if ok else "failed")
 
     def _mark_output_status(self, transfer_id, status):
@@ -250,25 +262,35 @@ class AppBridge(QObject):
                 ack = messages.create_ack(
                     self.core.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
                 )
-                await connect.send_message(writer, ack)
+                ok = await connect.send_message(writer, ack)
+                if not ok:
+                    logger.warning("CHUNK_ACK_SEND_FAILED peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
+        else:
+            logger.warning("CHUNK_ACK peer not in db id=%s", str(peer_id)[:8])
 
     async def _receive_async(self, peer_id, transfer_id):
         peer = db.get_peer(self.core.db, peer_id)
         if peer:
             reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if reader is not None and writer is not None:
-                connection = (reader, writer)
-                output_dir = self._save_dir
+            if reader is None or writer is None:
+                logger.error("RECV_CONNECT_FAILED ip=%s port=%s", peer["ip"], peer["port"])
+                return
+            connection = (reader, writer)
+            output_dir = self._save_dir
+            logger.info("RECV_START peer=%s transfer=%s save_dir=%s", str(peer_id)[:8], str(transfer_id)[:8], output_dir)
 
-                def on_progress(percent):
-                    self._transfer_progress[transfer_id] = percent
-                    self.transferProgressChanged.emit()
-
-                _, _ = await transfer.recive_files(
-                    peer_id, connection, self, output_dir, progress_callback=on_progress
-                )
-                self._transfer_progress.pop(transfer_id, None)
+            def on_progress(percent):
+                self._transfer_progress[transfer_id] = percent
                 self.transferProgressChanged.emit()
+
+            ok, reason = await transfer.recive_files(
+                peer_id, connection, self, output_dir, progress_callback=on_progress
+            )
+            logger.info("RECV_DONE ok=%s reason=%s", ok, reason)
+            self._transfer_progress.pop(transfer_id, None)
+            self.transferProgressChanged.emit()
+        else:
+            logger.warning("RECV peer not in db id=%s", str(peer_id)[:8])
 
     async def send_sync_response(self, peer_id, resp):
         peer = db.get_peer(self.core.db, peer_id)
