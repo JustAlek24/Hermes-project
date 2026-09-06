@@ -1,7 +1,0 @@
-2026-09-06 21:38:08,290 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
-2026-09-06 21:38:13,234 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
-2026-09-06 21:38:17,332 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
-2026-09-06 21:38:25,758 INFO [app.bridge] ACCEPT transfer=3f17e478 peer=6c246a86
-2026-09-06 21:39:07,874 ERROR [app.bridge] RECV_CONNECT_FAILED ip=192.168.1.36 port=65432
-2026-09-06 21:39:11,152 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
-2026-09-06 21:39:29,665 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
