@@ -25,8 +25,39 @@ def init_db():
             );
         """
         cursor.execute(query_create)
+        query_create_identity = """
+        CREATE TABLE IF NOT EXISTS identity(
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            peer_id TEXT,
+            peer_name TEXT,
+            updated_at INTEGER
+            );
+        """
+        cursor.execute(query_create_identity)
         connection.commit()
         return connection
+
+
+def get_identity(conn):
+    with _lock:
+        cur = conn.cursor()
+        cur.execute("SELECT peer_id, peer_name, updated_at FROM identity WHERE id = 1")
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {"peer_id": row[0], "peer_name": row[1], "updated_at": row[2]}
+
+
+def save_identity(conn, peer_id, peer_name):
+    with _lock:
+        cur = conn.cursor()
+        updated_at = int(time.time())
+        cur.execute(
+            "INSERT OR REPLACE INTO identity (id, peer_id, peer_name, updated_at)"
+            " VALUES (1, ?, ?, ?)",
+            (peer_id, peer_name, updated_at),
+        )
+        conn.commit()
 
 
 def add_peer(conn, peer_id, peer_name, ip, port):
@@ -159,6 +190,19 @@ def update_last_seen(conn, peer_id):
         last_seen = time.time()
         cur.execute(
             "UPDATE storage SET last_seen = ? WHERE peer_id = ?", (last_seen, peer_id)
+        )
+        conn.commit()
+
+
+def delete_peer_with_address(conn, peer_id, ip, port):
+    """Удаляет строки того же адреса (ip, port), но с другим peer_id.
+    Чистит дубликаты, накопившиеся от старых запусков (идентичность менялась
+    при каждом перезапуске). Один адрес = один пир."""
+    with _lock:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM storage WHERE ip = ? AND port = ? AND peer_id <> ?",
+            (ip, port, peer_id),
         )
         conn.commit()
 

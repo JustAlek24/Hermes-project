@@ -66,13 +66,28 @@ def handle_message(parsed, app, sender_ip=None):
         # Регистрируем отправителя по его реальному peer_id, чтобы
         # приём файла (ack/получение) находили его адрес независимо от
         # ручного добавления пира со случайным id.
-        sender_port = parsed.get("data", {}).get("port")
+        data = parsed.get("data", {})
+        sender_port = data.get("port")
+        sender_name = data.get("peer_name")
         if sender_ip and sender_port:
             existing = db.get_peer(app.db, peer_id)
             if existing is None:
-                db.add_peer(app.db, peer_id, peer_id, sender_ip, sender_port)
+                db.add_peer(
+                    app.db,
+                    peer_id,
+                    sender_name or peer_id,
+                    sender_ip,
+                    sender_port,
+                )
             else:
-                db.update_peer(app.db, peer_id, ip=sender_ip, port=sender_port)
+                db.update_peer(
+                    app.db,
+                    peer_id,
+                    ip=sender_ip,
+                    port=sender_port,
+                    peer_name=sender_name,
+                )
+            db.delete_peer_with_address(app.db, peer_id, sender_ip, sender_port)
         app.add_incoming_transfer(parsed.get("data"), peer_id)
 
     elif msg_type == "FILE_CHUNK":

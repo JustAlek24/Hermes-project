@@ -79,6 +79,7 @@ Rectangle {
         UniversalButton {
             id: viewBtn
             text: "Посмотреть"
+            visible: banner.transferId !== ""
             Layout.preferredWidth: 120
             Layout.fillWidth: false
             normalColor: Theme.buttonPrimary
@@ -115,10 +116,16 @@ Rectangle {
     // Показ уведомления (перезапускает анимацию)
     function show(text, id) {
         banner.message = text
-        banner.transferId = id
+        banner.transferId = (id === undefined || id === null) ? "" : id
         banner.visible = true
         banner.opacity = 1
         banner.shiftX = 0
+        // Обычные информационные уведомления (без передачи) прячем сами через 5 сек
+        if (!id || id === "") {
+            autoHideTimer.start()
+        } else {
+            autoHideTimer.stop()
+        }
     }
 
     // Скрытие с анимацией уезжания вправо за экран
@@ -134,6 +141,15 @@ Rectangle {
         repeat: false
         onTriggered: {
             banner.visible = false
+        }
+    }
+
+    Timer {
+        id: autoHideTimer
+        interval: 5000
+        repeat: false
+        onTriggered: {
+            banner.hide()
         }
     }
 }

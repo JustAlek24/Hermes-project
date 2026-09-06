@@ -1,4 +1,5 @@
 import asyncio
+import socket
 import time
 import uuid
 
@@ -22,12 +23,14 @@ class Config:
         udp_port=65433,
         bootstrap_ip=None,
         bootstrap_port=None,
+        peer_name=None,
     ):
         self.host = host
         self.port = port
         self.udp_port = udp_port
         self.bootstrap_ip = bootstrap_ip
         self.bootstrap_port = bootstrap_port
+        self.peer_name = peer_name or socket.gethostname()
 
 
 class HermesApp:
@@ -42,7 +45,21 @@ class HermesApp:
         self.db = conn
         self._loop = loop
         self.config = config if config is not None else Config()
-        self.my_peer_id = uuid.uuid4().hex
+        # Идентичность (peer_id/peer_name) переживает перезапуски: хранится в БД.
+        # Раньше peer_id генерировался заново при каждом старте, из-за чего на
+        # пирах копились дубликаты одной и той же машины.
+        ident = db.get_identity(self.db)
+        if ident and ident.get("peer_id"):
+            self.my_peer_id = ident["peer_id"]
+            self.my_peer_name = (
+                ident.get("peer_name")
+                or self.config.peer_name
+                or ident["peer_id"]
+            )
+        else:
+            self.my_peer_id = uuid.uuid4().hex
+            self.my_peer_name = self.config.peer_name or self.my_peer_id
+            db.save_identity(self.db, self.my_peer_id, self.my_peer_name)
         self._peer_status = {}
         self.pending_acks = {}
         self._transfers = []
@@ -75,14 +92,16 @@ class HermesApp:
     def get_all_peers(self, conn=None):
         return db.get_all_peers(self.db)
 
-    def on_peer_discovered(self, peer_id, ip, port):
+    def on_peer_discovered(self, peer_id, ip, port, name=None):
         if not peer_id:
             return
+        peer_name = name or peer_id
         existing = db.get_peer(self.db, peer_id)
         if existing is None:
-            db.add_peer(self.db, peer_id, peer_id, ip, port)
+            db.add_peer(self.db, peer_id, peer_name, ip, port)
         else:
-            db.update_peer(self.db, peer_id, ip=ip, port=port)
+            db.update_peer(self.db, peer_id, ip=ip, port=port, peer_name=peer_name)
+        db.delete_peer_with_address(self.db, peer_id, ip, port)
         db.update_last_seen(self.db, peer_id)
         self.update_peer_status(peer_id, "online")
 

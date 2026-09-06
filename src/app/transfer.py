@@ -58,11 +58,19 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     file_size = os.path.getsize(filepath)
     chunks_count = len(chunks)
     meta = messages.create_meta(
-        my_peer_id, filename, file_size, chunks_count, file_sha, app.config.port
+        my_peer_id,
+        app.my_peer_name,
+        filename,
+        file_size,
+        chunks_count,
+        file_sha,
+        app.config.port,
     )
     app.register_pending("META", recipient_id)
-    await connect.send_message(connection[1], meta)
-    ok, status = await app.wait_for_ack("META", recipient_id, timeout=10)
+    sent = await connect.send_message(connection[1], meta)
+    if not sent:
+        return (False, "Соединение потеряно")
+    ok, status = await app.wait_for_ack("META", recipient_id, timeout=120)
     if not ok:
         return (False, "Отказано" if status == "REJECT" else "Адресат не отвечает")
     for i in range(chunks_count):
@@ -79,7 +87,7 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
     app.register_pending("DONE", recipient_id)
-    ok, _ = await app.wait_for_ack("DONE", recipient_id)
+    ok, _ = await app.wait_for_ack("DONE", recipient_id, timeout=60)
     if not ok:
         return (False, "Файл не подтверждён")
     return (True, None)

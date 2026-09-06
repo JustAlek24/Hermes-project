@@ -22,6 +22,7 @@ class AppBridge(QObject):
     peersChanged = Signal()
     transferProgressChanged = Signal()
     incomingTransfer = Signal(str)
+    notify = Signal(str)
 
     def __init__(self, core, loop=None, parent=None):
         super().__init__(parent)
@@ -55,19 +56,41 @@ class AppBridge(QObject):
     @Slot()
     def find_peers(self):
         cfg = self.core.config
-        coro = search.send_discover_once(cfg.udp_port, self.core.my_peer_id, cfg.port)
+        coro = self._find_peers_async(cfg)
         if self._loop:
             asyncio.run_coroutine_threadsafe(coro, self._loop)
+
+    async def _find_peers_async(self, cfg):
+        before = {p["peer_id"] for p in db.get_all_peers(self.core.db)}
+        await search.send_discover_once(
+            cfg.udp_port, self.core.my_peer_id, cfg.port, self.core.my_peer_name
+        )
+        await asyncio.sleep(5)
+        after = {p["peer_id"] for p in db.get_all_peers(self.core.db)}
+        new_peers = after - before
+        if new_peers:
+            self.notify.emit(f"Найдено новых пиров: {len(new_peers)}")
+        else:
+            self.notify.emit("Новые пиры не найдены")
 
     @Slot()
     def check_status(self):
         from network import heartbeat
 
+        coro = self._check_status_async(heartbeat)
         if self._loop:
-            asyncio.run_coroutine_threadsafe(
-                heartbeat.check_peers_now(self.core), self._loop
-            )
-        print("Проверка статуса пиров...")
+            asyncio.run_coroutine_threadsafe(coro, self._loop)
+
+    async def _check_status_async(self, heartbeat):
+        peers = db.get_all_peers(self.core.db)
+        if not peers:
+            self.notify.emit("Список пиров пуст")
+            return
+        await heartbeat.check_peers_now(self.core)
+        statuses = dict(self.core._peer_status)
+        online = sum(1 for s in statuses.values() if s == "online")
+        offline = sum(1 for s in statuses.values() if s == "offline")
+        self.notify.emit(f"Онлайн: {online}, офлайн: {offline} из {len(peers)}")
 
     @Slot(str, str, str, result=bool)
     def add_peer(self, name, ip, port):
@@ -128,7 +151,9 @@ class AppBridge(QObject):
     def search_peers(self, query):
         print(f"Поиск: {query}")
         cfg = self.core.config
-        coro = search.send_discover_once(cfg.udp_port, self.core.my_peer_id, cfg.port)
+        coro = search.send_discover_once(
+            cfg.udp_port, self.core.my_peer_id, cfg.port, self.core.my_peer_name
+        )
         if self._loop:
             asyncio.run_coroutine_threadsafe(coro, self._loop)
 

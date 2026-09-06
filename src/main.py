@@ -41,7 +41,11 @@ def start_network(app, loop):
         lambda: loop.create_task(heartbeat.heartbeat_loop(app))
     )
     loop.call_soon_threadsafe(
-        lambda: loop.create_task(search.broadcast_discovery(udp_port, app.my_peer_id, port))
+        lambda: loop.create_task(
+            search.broadcast_discovery(
+                udp_port, app.my_peer_id, port, app.my_peer_name
+            )
+        )
     )
     loop.call_soon_threadsafe(
         lambda: loop.create_task(

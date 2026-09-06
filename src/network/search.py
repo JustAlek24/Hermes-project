@@ -74,11 +74,16 @@ def _broadcast_targets(port):
     return targets
 
 
-async def broadcast_discovery(port, my_peer_id, my_port, interval=5):
+async def broadcast_discovery(port, my_peer_id, my_port, my_peer_name, interval=5):
     loop = asyncio.get_running_loop()
     try:
         while True:
-            message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
+            message = {
+                "type": "DISCOVER",
+                "peer_id": my_peer_id,
+                "name": my_peer_name,
+                "port": my_port,
+            }
             data = json.dumps(message).encode()
             for bind_ip, addr in _broadcast_targets(port):
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -95,9 +100,14 @@ async def broadcast_discovery(port, my_peer_id, my_port, interval=5):
         raise
 
 
-async def send_discover_once(port, my_peer_id, my_port):
+async def send_discover_once(port, my_peer_id, my_port, my_peer_name):
     loop = asyncio.get_running_loop()
-    message = {"type": "DISCOVER", "peer_id": my_peer_id, "port": my_port}
+    message = {
+        "type": "DISCOVER",
+        "peer_id": my_peer_id,
+        "name": my_peer_name,
+        "port": my_port,
+    }
     data = json.dumps(message).encode()
     for bind_ip, addr in _broadcast_targets(port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -127,15 +137,24 @@ async def listen_broadcast(port, on_peer):
             mtype = message.get("type")
             if mtype in {"DISCOVER", "ANNOUNCE"}:
                 await on_peer(
-                    message.get("peer_id"), addr[0], message.get("port"), mtype
+                    message.get("peer_id"),
+                    addr[0],
+                    message.get("port"),
+                    mtype,
+                    message.get("name"),
                 )
     finally:
         sock.close()
 
 
-async def announce_on_discover(discover_message, addr, my_peer_id, my_port):
+async def announce_on_discover(discover_message, addr, my_peer_id, my_port, my_peer_name):
     try:
-        message = {"type": "ANNOUNCE", "peer_id": my_peer_id, "port": my_port}
+        message = {
+            "type": "ANNOUNCE",
+            "peer_id": my_peer_id,
+            "name": my_peer_name,
+            "port": my_port,
+        }
         data = json.dumps(message).encode()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setblocking(False)
@@ -146,13 +165,17 @@ async def announce_on_discover(discover_message, addr, my_peer_id, my_port):
 
 
 def make_discovery_callback(app):
-    async def _on_peer(peer_id, ip, port, mtype):
+    async def _on_peer(peer_id, ip, port, mtype, name=None):
         if not peer_id or peer_id == app.my_peer_id:
             return
-        app.on_peer_discovered(peer_id, ip, port)
+        app.on_peer_discovered(peer_id, ip, port, name)
         if mtype == "DISCOVER":
             await announce_on_discover(
-                None, (ip, app.config.udp_port), app.my_peer_id, app.config.port
+                None,
+                (ip, app.config.udp_port),
+                app.my_peer_id,
+                app.config.port,
+                app.my_peer_name,
             )
 
     return _on_peer

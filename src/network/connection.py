@@ -21,7 +21,11 @@ async def start_tcp_server(port, app):
 
         try:
             while True:
-                raw_message = await receive_message(reader, timeout=10)
+                # Без таймаута: соединение должно жить, пока пир не закроет его
+                # сам. Таймаут в 10 сек убивал соединение во время ожидания
+                # решения пользователя (приём файла), а также канал подтверждений
+                # между передачами — следующая передача уходила в битый сокет.
+                raw_message = await receive_message(reader, timeout=None)
                 if raw_message is None:
                     break
                 try:
@@ -52,13 +56,17 @@ async def start_tcp_server(port, app):
         await server.serve_forever()
 
 
-async def connect_to_peer(ip, port):
+async def connect_to_peer(ip, port, force=False):
     key = (ip, port)
 
     async with _connection_lock:
-        if key in _connections:
+        if not force and key in _connections:
             reader, writer = _connections[key]
-            if not writer.is_closing():
+            # writer.is_closing() может оставаться False после закрытия пиром
+            # сокета — проверяем и транспорт, чтобы не переиспользовать битый.
+            transport = getattr(writer, "transport", None)
+            transport_closing = transport is not None and transport.is_closing()
+            if not writer.is_closing() and not transport_closing:
                 return reader, writer
             del _connections[key]
         try:

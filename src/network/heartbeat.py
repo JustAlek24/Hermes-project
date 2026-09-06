@@ -1,7 +1,7 @@
 import asyncio
 
 from data.database import update_last_seen
-from network.connection import connect_to_peer, receive_message, send_message
+from network.connection import receive_message, send_message
 from protocol.messages import create_heartbeat
 
 
@@ -11,17 +11,20 @@ async def _ping_peer(app, peer):
     port = peer["port"]
 
     try:
-        reader, writer = await connect_to_peer(ip, port)
-        if reader is None or writer is None:
-            app.update_peer_status(peer_id, "offline")
-            return
+        # Собственное соединение, а не общий кэш connect_to_peer: heartbeat
+        # закрывает сокет после каждого пинга, а передача файла живёт на том же
+        # (ip, port) — закрытие переиспользуемого соединения рвало передачу.
+        reader, writer = await asyncio.open_connection(ip, port)
+    except (ConnectionRefusedError, OSError):
+        app.update_peer_status(peer_id, "offline")
+        return
 
+    try:
         heartbeat_dict = create_heartbeat(app.my_peer_id)
         success = await send_message(writer, heartbeat_dict)
 
         if not success:
             app.update_peer_status(peer_id, "offline")
-            writer.close()
             return
 
         response = await receive_message(reader, timeout=5)
@@ -30,12 +33,9 @@ async def _ping_peer(app, peer):
             update_last_seen(app.db, peer_id)
         else:
             app.update_peer_status(peer_id, "offline")
-
+    finally:
         writer.close()
         await writer.wait_closed()
-
-    except (OSError, ConnectionError, TimeoutError):
-        app.update_peer_status(peer_id, "offline")
 
 
 async def check_peers_now(app):

@@ -92,6 +92,9 @@ ApplicationWindow {
                     transferId
                 )
             }
+            function onNotify(message) {
+                notification.show(message)
+            }
         }
     }
 }
