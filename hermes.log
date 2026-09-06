@@ -1,0 +1,293 @@
+2026-09-06 21:38:08,290 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:38:13,234 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:38:17,332 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-06 21:38:25,758 INFO [app.bridge] ACCEPT transfer=3f17e478 peer=6c246a86
+2026-09-06 21:39:07,874 ERROR [app.bridge] RECV_CONNECT_FAILED ip=192.168.1.36 port=65432
+2026-09-06 21:39:11,152 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:39:29,665 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:40:34,882 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:40:50,803 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:41:58,124 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:42:12,000 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:43:21,589 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:43:33,080 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:44:45,070 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:44:54,201 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:46:08,237 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:46:16,132 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:47:31,539 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:47:37,351 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:48:52,203 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:48:55,998 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:50:15,409 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:50:17,154 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:51:38,356 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:51:38,516 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:53:00,011 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:53:01,675 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:54:21,324 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:54:25,410 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:55:42,472 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:55:48,803 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:57:03,646 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:57:11,975 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:58:24,791 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:58:35,354 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 21:59:45,992 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 21:59:58,889 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:01:07,230 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:01:22,130 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:02:28,395 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,058 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 462, in finish_socket_func
+    return ov.getresult()
+           ^^^^^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+             ^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 466, in finish_socket_func
+    raise ConnectionResetError(*exc.args)
+ConnectionResetError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:42:32,061 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,063 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,065 ERROR [asyncio] Unhandled exception in event loop: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 402, in _loop_writing
+    self._write_fut = self._loop._proactor.send(self._sock, data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 542, in send
+    ov.WSASend(conn.fileno(), buf, flags)
+ConnectionAbortedError: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+2026-09-06 22:42:32,066 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,066 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 566, in accept_coro
+    await future
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 555, in finish_accept
+    ov.getresult()
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:42:32,068 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 846, in loop
+    conn, addr = f.result()
+                 ^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:42:32,068 ERROR [asyncio] Unhandled exception in event loop: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 402, in _loop_writing
+    self._write_fut = self._loop._proactor.send(self._sock, data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 542, in send
+    ov.WSASend(conn.fileno(), buf, flags)
+ConnectionAbortedError: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+2026-09-06 22:42:32,069 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,070 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:42:32,071 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 462, in finish_socket_func
+    return ov.getresult()
+           ^^^^^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\heartbeat.py", line 60, in heartbeat_loop
+    await _ping_peer(app, peer)
+  File "D:\Projects\Git\Hermes-project\src\.\network\heartbeat.py", line 40, in _ping_peer
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+             ^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 466, in finish_socket_func
+    raise ConnectionResetError(*exc.args)
+ConnectionResetError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:42:32,071 ERROR [asyncio] Unhandled exception in event loop: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 402, in _loop_writing
+    self._write_fut = self._loop._proactor.send(self._sock, data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 542, in send
+    ov.WSASend(conn.fileno(), buf, flags)
+ConnectionAbortedError: [WinError 10053] Программа на вашем хост-компьютере разорвала установленное подключение
+2026-09-06 22:43:23,660 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:43:38,584 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:43:41,741 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:43:46,751 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:43:47,352 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:43:47,576 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:43:54,714 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-06 22:44:05,267 INFO [app.bridge] ACCEPT transfer=0b531c23 peer=6c246a86
+2026-09-06 22:44:26,071 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:44:47,378 ERROR [app.bridge] RECV_CONNECT_FAILED ip=192.168.1.36 port=65432
+2026-09-06 22:44:59,885 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:45:40,351 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 462, in finish_socket_func
+    return ov.getresult()
+           ^^^^^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+             ^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 466, in finish_socket_func
+    raise ConnectionResetError(*exc.args)
+ConnectionResetError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:45:49,333 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:47:13,302 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:47:51,460 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:47:51,661 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-06 22:48:33,824 INFO [app.bridge] ACCEPT transfer=640d2a6c peer=6c246a86
+2026-09-06 22:48:37,349 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:49:15,929 ERROR [app.bridge] RECV_CONNECT_FAILED ip=192.168.1.36 port=65432
+2026-09-06 22:50:01,775 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:50:51,340 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 462, in finish_socket_func
+    return ov.getresult()
+           ^^^^^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+             ^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 466, in finish_socket_func
+    raise ConnectionResetError(*exc.args)
+ConnectionResetError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 22:51:25,122 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:51:38,946 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:51:49,437 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:51:54,559 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 22:51:54,858 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-06 22:52:48,418 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:54:11,744 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:55:34,975 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:56:58,111 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:58:21,255 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 22:59:44,385 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:01:07,954 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:02:31,138 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:03:55,019 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:05:18,456 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:06:43,525 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:08:09,062 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:52:02,450 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:53:30,875 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:53:31,794 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.36 size=105
+2026-09-06 23:53:31,915 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-06 23:54:04,440 INFO [app.bridge] ACCEPT transfer=aa58c797 peer=6c246a86
+2026-09-06 23:54:33,700 ERROR [asyncio] Unhandled exception in event loop: [WinError 64] Указанное сетевое имя более недоступно
+Traceback (most recent call last):
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 462, in finish_socket_func
+    return ov.getresult()
+           ^^^^^^^^^^^^^^
+OSError: [WinError 64] Указанное сетевое имя более недоступно
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Git\Hermes-project\src\.\network\connection.py", line 64, in handler
+    await writer.wait_closed()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\streams.py", line 364, in wait_closed
+    await self._protocol._get_close_waiter(self)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+             ^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\windows_events.py", line 466, in finish_socket_func
+    raise ConnectionResetError(*exc.args)
+ConnectionResetError: [WinError 64] Указанное сетевое имя более недоступно
+2026-09-06 23:54:46,552 ERROR [app.bridge] RECV_CONNECT_FAILED ip=192.168.1.36 port=65432
+2026-09-06 23:54:54,070 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:56:17,696 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:57:40,812 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:59:04,101 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-06 23:59:44,623 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-07 00:00:14,632 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-07 00:00:27,271 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:01:50,509 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:02:35,126 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-07 00:03:05,123 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.36 size=287
+2026-09-07 00:03:13,681 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:04:36,934 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:06:00,329 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:07:23,508 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:08:46,695 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:10:09,961 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:11:33,214 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:12:56,449 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:14:19,822 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:15:42,973 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:17:06,202 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:18:29,350 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:19:52,493 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:21:15,796 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:22:38,921 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:24:02,137 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:25:25,324 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:26:48,429 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:28:11,606 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:29:35,007 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:30:58,156 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:32:21,302 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:33:44,473 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:35:07,610 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:36:30,788 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:37:53,928 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105
+2026-09-07 00:39:17,061 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=192.168.1.35 size=105

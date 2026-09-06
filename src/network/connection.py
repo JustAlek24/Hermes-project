@@ -48,7 +48,7 @@ async def start_tcp_server(port, app):
                     len(raw_message),
                 )
                 try:
-                    handle_message(parsed_message, app, sender_ip=sender_ip)
+                    handle_message(parsed_message, app, sender_ip=sender_ip, writer=writer)
                 except Exception:
                     logger.exception("Ошибка при обработке сообщения")
                 if parsed_message.get("type") == "HEARTBEAT":
@@ -89,6 +89,39 @@ async def connect_to_peer(ip, port, force=False):
             return None, None
         _connections[key] = (reader, writer)
         return reader, writer
+
+
+async def read_outgoing_stream(reader, app, writer=None):
+    """Читает ответы пира на исходящем подключении (ACK/REJECT/ERROR/DONE).
+
+    Получатель отвечает на META/FILE_CHUNK/DONE по тому же сокету, через
+    который отправитель шлёт данные. Раньше получатель открывал встречное
+    подключение к отправителю — оно падало за NAT/файрволом, ACK не доходили
+    и передача зависала. Это слушает исходящий сокет и разбирает ответы."""
+    try:
+        while True:
+            raw_message = await receive_message(reader, timeout=None)
+            if raw_message is None:
+                break
+            try:
+                parsed_message = app.parse_message(raw_message)
+            except Exception:
+                logger.exception("Ошибка при парсинге сообщения")
+                continue
+            if not isinstance(parsed_message, dict) or parsed_message.get("error"):
+                continue
+            logger.info(
+                "RECV_REPLY type=%s peer=%s size=%d",
+                parsed_message.get("type"),
+                str(parsed_message.get("peer_id"))[:8],
+                len(raw_message),
+            )
+            try:
+                handle_message(parsed_message, app, writer=writer)
+            except Exception:
+                logger.exception("Ошибка при обработке сообщения")
+    except (ConnectionResetError, BrokenPipeError, OSError):
+        pass
 
 
 async def send_message(writer, message_json):

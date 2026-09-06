@@ -70,6 +70,14 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         file_sha,
         app.config.port,
     )
+    # Ответы пира (ACK/REJECT/ERROR) приходят по тому же сокету, в который мы
+    # пишем файл. Слушаем его в фоне — иначе ACK-и никто не обработает и
+    # отправка зависнет на ожидании подтверждения META / чанков / DONE.
+    reader = connection[0]
+    if id(reader) not in app._outbound_readers or app._outbound_readers[id(reader)].done():
+        app._outbound_readers[id(reader)] = asyncio.create_task(
+            connect.read_outgoing_stream(reader, app, writer=connection[1])
+        )
     app.register_pending("META", recipient_id)
     sent = await connect.send_message(connection[1], meta)
     if not sent:

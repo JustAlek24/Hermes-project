@@ -47,7 +47,7 @@ def parse_message(raw_string):
     return message
 
 
-def handle_message(parsed, app, sender_ip=None):
+def handle_message(parsed, app, sender_ip=None, writer=None):
     msg_type = parsed.get("type")
     peer_id = parsed.get("peer_id")
 
@@ -88,6 +88,11 @@ def handle_message(parsed, app, sender_ip=None):
                     peer_name=sender_name,
                 )
             db.delete_peer_with_address(app.db, peer_id, sender_ip, sender_port)
+        # Запоминаем входящее подключение, чтобы отвечать ACK/REJECT и
+        # подтверждать чанки по тому же сокету, не открывая встречное
+        # соединение к отправителю (за NAT/файрволом оно не проходит).
+        if writer is not None and not writer.is_closing():
+            app._incoming_connections[peer_id] = writer
         app.add_incoming_transfer(parsed.get("data"), peer_id)
 
     elif msg_type == "FILE_CHUNK":

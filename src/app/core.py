@@ -62,6 +62,13 @@ class HermesApp:
             db.save_identity(self.db, self.my_peer_id, self.my_peer_name)
         self._peer_status = {}
         self.pending_acks = {}
+        # peer_id → writer сокета, на котором пришёл META. По нему отвечаем
+        # ACK/REJECT и чанками — не нужно открывать встречное подключение,
+        # которое падает за NAT/файрволом и на котором зависала вся передача.
+        self._incoming_connections = {}
+        # id(reader) → задача, читающая ответы пира на исходящем подключении
+        # (ACK/REJECT/ERROR приходят по тому же сокету, куда мы пишем данные).
+        self._outbound_readers = {}
         self._transfers = []
         self.transfer_queue = []
         self.tcp_connections = []
