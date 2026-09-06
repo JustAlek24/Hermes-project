@@ -75,6 +75,38 @@ PageWithBottomPanel {
             InfoRow {label: "Размер: "; value: Utils.formatSize(root.currentTransfer.file_size)}
             InfoRow {label: "Дата: "; value: Utils.formatDate(root.currentTransfer.timestamp)}
             InfoRow {label: "SHA256: "; value: root.currentTransfer.sha256}
+
+            CustomProgressBar {
+                id: transferProgressBar
+                Layout.fillWidth: true
+                Layout.topMargin: 18
+                Layout.preferredHeight: 16
+                visible: {
+                    var s = root.currentTransfer.status
+                    return s === "pending" || s === "accepted" || s === "sending" || s === "receiving"
+                }
+                value: {
+                    var p = app.transfer_progress[root.currentTransfer.transfer_id]
+                    return p !== undefined ? p / 100 : 0
+                }
+            }
+
+            Text {
+                id: progressHint
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 4
+                visible: transferProgressBar.visible
+                text: {
+                    var s = root.currentTransfer.status
+                    if (s === "pending") return "Ожидает решения..."
+                    if (s === "accepted") return "Принято, идёт приём файла..."
+                    if (s === "sending") return "Идёт отправка файла..."
+                    if (s === "receiving") return "Идёт приём файла..."
+                    return ""
+                }
+                font.pixelSize: 12
+                color: Theme.textSecondaryColor
+            }
         }
     }
 
