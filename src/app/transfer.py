@@ -99,6 +99,11 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
 
 
 async def recive_files(peer_id, connection, app, output_dir, progress_callback=None):
+    # Дата приходить либо напрямую (HermesApp), либо через мост (AppBridge у
+    # которого реальный контур лежит в .core). В мост нет ни my_peer_id, ни
+    # update_transfer_status — без этого DONE-подтверждение не ушло бы и
+    # отправка зависла бы на «Файл не подтверждён».
+    core = getattr(app, "core", app)
     buf = _receive_buffers.get(peer_id)
     if not buf:
         return (False, "Буфер не инициализирован")
@@ -124,18 +129,18 @@ async def recive_files(peer_id, connection, app, output_dir, progress_callback=N
 
     if ok:
         await connect.send_message(
-            connection[1], messages.create_ack(app.my_peer_id, "DONE")
+            connection[1], messages.create_ack(core.my_peer_id, "DONE")
         )
-        app.update_transfer_status(peer_id, "completed")
+        core.update_transfer_status(peer_id, "completed")
         return (True, output_path)
     else:
         await connect.send_message(
             connection[1],
             messages.create_error(
-                app.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"
+                core.my_peer_id, "CHECKSUM_MISMATCH", "SHA256 не совпадает"
             ),
         )
-        app.update_transfer_status(peer_id, "error")
+        core.update_transfer_status(peer_id, "error")
         return (False, "SHA256 не совпадает")
 
 
