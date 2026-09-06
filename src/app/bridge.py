@@ -241,56 +241,49 @@ class AppBridge(QObject):
         return self._transfer_progress
 
     async def _send_ack_async(self, peer_id):
-        peer = db.get_peer(self.core.db, peer_id)
-        if peer:
-            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if reader is not None and writer is not None:
-                await transfer.send_ack(self.core.my_peer_id, (reader, writer))
+        writer = connect.get_in_connection(peer_id)
+        if writer is None:
+            logger.warning("ACK_ABORT нет входящего канала от peer=%s", str(peer_id)[:8])
+            return
+        await transfer.send_ack(self.core.my_peer_id, writer)
 
     async def _send_reject_async(self, peer_id):
-        peer = db.get_peer(self.core.db, peer_id)
-        if peer:
-            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if reader is not None and writer is not None:
-                await transfer.send_reject(self.core.my_peer_id, (reader, writer))
+        writer = connect.get_in_connection(peer_id)
+        if writer is None:
+            logger.warning("REJECT_ABORT нет входящего канала от peer=%s", str(peer_id)[:8])
+            return
+        await transfer.send_reject(self.core.my_peer_id, writer)
 
     async def _send_chunk_ack_async(self, peer_id, chunk_id):
-        peer = db.get_peer(self.core.db, peer_id)
-        if peer:
-            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if reader is not None and writer is not None:
-                ack = messages.create_ack(
-                    self.core.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
-                )
-                ok = await connect.send_message(writer, ack)
-                if not ok:
-                    logger.warning("CHUNK_ACK_SEND_FAILED peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
-        else:
-            logger.warning("CHUNK_ACK peer not in db id=%s", str(peer_id)[:8])
+        writer = connect.get_in_connection(peer_id)
+        if writer is None:
+            logger.warning("CHUNK_ACK нет входящего канала от peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
+            return
+        ack = messages.create_ack(
+            self.core.my_peer_id, "FILE_CHUNK", chunk_id=chunk_id
+        )
+        ok = await connect.send_message(writer, ack)
+        if not ok:
+            logger.warning("CHUNK_ACK_SEND_FAILED peer=%s chunk=%s", str(peer_id)[:8], chunk_id)
 
     async def _receive_async(self, peer_id, transfer_id):
-        peer = db.get_peer(self.core.db, peer_id)
-        if peer:
-            reader, writer = await connect.connect_to_peer(peer["ip"], peer["port"])
-            if reader is None or writer is None:
-                logger.error("RECV_CONNECT_FAILED ip=%s port=%s", peer["ip"], peer["port"])
-                return
-            connection = (reader, writer)
-            output_dir = self._save_dir
-            logger.info("RECV_START peer=%s transfer=%s save_dir=%s", str(peer_id)[:8], str(transfer_id)[:8], output_dir)
+        writer = connect.get_in_connection(peer_id)
+        if writer is None:
+            logger.error("RECV_CONNECT_FAILED нет входящего канала от peer=%s", str(peer_id)[:8])
+            return
+        output_dir = self._save_dir
+        logger.info("RECV_START peer=%s transfer=%s save_dir=%s", str(peer_id)[:8], str(transfer_id)[:8], output_dir)
 
-            def on_progress(percent):
-                self._transfer_progress[transfer_id] = percent
-                self.transferProgressChanged.emit()
-
-            ok, reason = await transfer.recive_files(
-                peer_id, connection, self, output_dir, progress_callback=on_progress
-            )
-            logger.info("RECV_DONE ok=%s reason=%s", ok, reason)
-            self._transfer_progress.pop(transfer_id, None)
+        def on_progress(percent):
+            self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
-        else:
-            logger.warning("RECV peer not in db id=%s", str(peer_id)[:8])
+
+        ok, reason = await transfer.recive_files(
+            peer_id, writer, self, output_dir, progress_callback=on_progress
+        )
+        logger.info("RECV_DONE ok=%s reason=%s", ok, reason)
+        self._transfer_progress.pop(transfer_id, None)
+        self.transferProgressChanged.emit()
 
     async def send_sync_response(self, peer_id, resp):
         peer = db.get_peer(self.core.db, peer_id)
