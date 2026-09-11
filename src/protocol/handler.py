@@ -6,6 +6,8 @@ from protocol import messages, sec
 
 KNOWN_TYPES = {
     "HEARTBEAT",
+    "HELLO",
+    "HELLO_RESPONSE",
     "META",
     "FILE_CHUNK",
     "ACK",
@@ -14,6 +16,14 @@ KNOWN_TYPES = {
     "SYNC_REQUEST",
     "SYNC_RESPONSE",
 }
+
+
+def _send_hello_reply(writer, resp):
+    # Локальный import: network.connection импортирует protocol.handler наверху,
+    # чтобы не получить кольцевую зависимость.
+    from network import connection as connect
+
+    return connect.send_message(writer, resp)
 
 
 def parse_message(raw_string):
@@ -53,6 +63,31 @@ def handle_message(parsed, app, sender_ip=None, writer=None):
 
     if msg_type == "HEARTBEAT":
         app.update_peer_status(peer_id, "online")
+
+    elif msg_type == "HELLO":
+        # TCP-поиск пиров: нас просканировали по подсети. Запоминаем
+        # отправителя (как при DISCOVER) и отвечаем своей идентичностью —
+        # сканер добавит нас в свой список. Приём/отправка идут по тому же
+        # сокету, поэтому никакой встречный дозвон не нужен.
+        data = parsed.get("data", {})
+        peer_name = data.get("peer_name")
+        peer_port = data.get("port")
+        if sender_ip:
+            app.on_peer_discovered(
+                peer_id, sender_ip, peer_port or app.config.port, peer_name
+            )
+        if writer is not None and not writer.is_closing():
+            resp = messages.create_hello_response(
+                app.my_peer_id, app.my_peer_name, app.config.port
+            )
+            asyncio.run_coroutine_threadsafe(
+                _send_hello_reply(writer, resp), app._loop
+            )
+
+    elif msg_type == "HELLO_RESPONSE":
+        # Ответ на HELLO обрабатываем напрямую в сканере подсети
+        # (search.tcp_scan_peers). Здесь ничего делать не нужно.
+        pass
 
     elif msg_type == "ACK":
         app.resolve_pending(

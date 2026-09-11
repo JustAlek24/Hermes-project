@@ -12,9 +12,19 @@ def _is_usable_lan_ip(ip):
 def _is_physical_iface(name):
     """Физические LAN-интерфейсы (Ethernet/WiFi) в приоритете над VPN/TAP."""
     low = name.lower()
-    if any(k in low for k in ("tap", "vpn", "tun", "teredo", "outline", "ppp", "wintun")):
-        return False
-    return True
+    virtual = (
+        "tap",
+        "vpn",
+        "tun",
+        "teredo",
+        "outline",
+        "ppp",
+        "wintun",
+        "wsl",
+        "vethernet",
+        "hyper-v",
+    )
+    return not any(k in low for k in virtual)
 
 
 def get_local_ips():

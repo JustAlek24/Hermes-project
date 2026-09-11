@@ -66,10 +66,9 @@ class AppBridge(QObject):
 
     async def _find_peers_async(self, cfg):
         before = {p["peer_id"] for p in db.get_all_peers(self.core.db)}
-        await search.send_discover_once(
-            cfg.udp_port, self.core.my_peer_id, cfg.port, self.core.my_peer_name
-        )
-        await asyncio.sleep(5)
+        # UDP-broadcast (65433) режется входящим UDP-фильтром Windows Firewall —
+        # ищем пиров TCP-сканом подсети на открытый порт 65432.
+        await search.tcp_scan_peers(self.core)
         after = {p["peer_id"] for p in db.get_all_peers(self.core.db)}
         new_peers = after - before
         if new_peers:

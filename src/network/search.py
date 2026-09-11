@@ -3,9 +3,14 @@ import json
 import socket
 
 from data.database import apply_sync
-from network import get_local_ips
-from network.connection import connect_to_peer, receive_message, send_message
-from protocol.messages import create_sync_request
+from network import _is_physical_iface, get_local_ips
+from network.connection import (
+    READER_LIMIT,
+    connect_to_peer,
+    receive_message,
+    send_message,
+)
+from protocol.messages import create_hello, create_sync_request
 
 BOOTSTRAP_IP = "127.0.0.1"
 BOOTSTRAP_PORT = 64352
@@ -179,3 +184,81 @@ def make_discovery_callback(app):
             )
 
     return _on_peer
+
+
+def _scan_addresses():
+    """Адреса для TCP-скана: все хосты 1..254 в каждой локальной подсети /24
+    физического интерфейса, кроме адресов самой машины (у неё может быть
+    несколько интерфейсов). Виртуальные подсети (WSL/Hyper-V/TAP) отсекаем —
+    там не бывает пиров Hermes, а скан упирается в таймауты."""
+    local_ips = [
+        ip
+        for iface, ip in get_local_ips()
+        if _is_physical_iface(iface)
+    ]
+    self_ips = set(local_ips)
+    addresses = []
+    seen = set()
+    for ip in local_ips:
+        parts = ip.split(".")
+        if len(parts) != 4:
+            continue
+        subnet = ".".join(parts[:3])
+        for host in range(1, 255):
+            candidate = f"{subnet}.{host}"
+            if candidate in seen or candidate in self_ips:
+                seen.add(candidate)
+                continue
+            seen.add(candidate)
+            addresses.append(candidate)
+    return addresses
+
+
+async def tcp_scan_peers(app, timeout=1.5, concurrency=32):
+    """Находит пиров TCP-сканированием локальных подсетей на порт приложения.
+
+    Каждому доступному адресу шлём HELLO со своим peer_id: сосед запоминает
+    нас (как при DISCOVER) и отвечает HELLO_RESPONSE со своей идентичностью.
+    Это заменяет UDP-broadcast, который упирается во входящий UDP-фильтр
+    Windows Firewall (порт 65433 режется), а TCP 65432 открыт — ручное
+    добавление пира через него проверено и работает."""
+    port = app.config.port
+    hello = create_hello(app.my_peer_id, app.my_peer_name, port)
+    addresses = _scan_addresses()
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def probe(address):
+        async with semaphore:
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(address, port, limit=READER_LIMIT),
+                    timeout=timeout,
+                )
+            except (asyncio.TimeoutError, OSError):
+                return
+            try:
+                if not await send_message(writer, hello):
+                    return
+                raw = await receive_message(reader, timeout=timeout)
+                if not raw:
+                    return
+                reply = json.loads(raw)
+                if reply.get("type") != "HELLO_RESPONSE":
+                    return
+                data = reply.get("data", {})
+                app.on_peer_discovered(
+                    reply.get("peer_id"),
+                    address,
+                    data.get("port") or port,
+                    data.get("peer_name"),
+                )
+            except (ValueError, TypeError):
+                return
+            finally:
+                writer.close()
+                try:
+                    await writer.wait_closed()
+                except (ConnectionResetError, OSError):
+                    pass
+
+    await asyncio.gather(*(probe(address) for address in addresses))

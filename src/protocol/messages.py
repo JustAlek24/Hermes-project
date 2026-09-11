@@ -20,6 +20,23 @@ def create_heartbeat(peer_id):
     return create_message("HEARTBEAT", peer_id)
 
 
+def create_hello(peer_id, peer_name=None, port=None):
+    """TCP-аналог DISCOVER: посильная «здравствуй, кто ты?».
+    UDP-broadcast упирается во входящий UDP-фильтр (Windows Firewall режет
+    65433), а TCP 65432 при ручном добавлении проверен и работает."""
+    data = {}
+    if peer_name is not None:
+        data["peer_name"] = peer_name
+    if port is not None:
+        data["port"] = port
+    return create_message("HELLO", peer_id, data)
+
+
+def create_hello_response(peer_id, peer_name, port):
+    data = {"peer_name": peer_name, "port": port}
+    return create_message("HELLO_RESPONSE", peer_id, data)
+
+
 def create_meta(peer_id, peer_name, filename, file_size, chunks_count, sha256, port=None):
     data = {
         "filename": filename,
