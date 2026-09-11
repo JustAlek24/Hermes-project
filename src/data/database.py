@@ -1,16 +1,33 @@
+import os
 import sqlite3
 import threading
 import time
-from pathlib import Path
 
 _lock = threading.RLock()
 
 
+def get_db_path():
+    """Путь к БД вне репозитория: профиль конкретной машины.
+
+    Раньше peers.db лежал в src/data и, если проект был общим/синхронизируемым
+    между двумя компами, оба читали одну и ту же identity → одинаковый peer_id,
+    а весь протокол завязан на «peer_id уникален». Теперь у каждой машины своя БД
+    и свой уникальный id."""
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+        db_dir = os.path.join(base, "Hermes")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(
+            os.path.expanduser("~"), ".local", "share"
+        )
+        db_dir = os.path.join(base, "hermes")
+    os.makedirs(db_dir, exist_ok=True)
+    return os.path.join(db_dir, "peers.db")
+
+
 def init_db():
     with _lock:
-        BASE_DIR = Path(__file__).resolve().parent
-        DB_PATH = BASE_DIR / "peers.db"
-        connection = sqlite3.connect(DB_PATH, check_same_thread=False)
+        connection = sqlite3.connect(get_db_path(), check_same_thread=False)
         cursor = connection.cursor()
 
         query_create = """
@@ -254,6 +271,25 @@ def apply_sync(conn, peer_list):
                 counter += 1
         conn.commit()
         return counter
+
+
+def remove_self_peers(conn, my_peer_id, local_ips):
+    """Удаляет «пиров», которые на самом деле являются этой же машиной:
+    записи с нашим собственным peer_id и записи с нашим локальным IP.
+
+    Чистит мусор от общего peers.db: когда оба компа делили одну БД, в storage
+    попадали записи про нас самих (свой peer_id и/или свой IP), и при отправке
+    получалось «Нельзя отправить файл самому себе»."""
+    with _lock:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM storage WHERE peer_id = ?", (my_peer_id,))
+        if local_ips:
+            placeholders = ",".join("?" * len(local_ips))
+            cur.execute(
+                f"DELETE FROM storage WHERE ip IN ({placeholders})",
+                tuple(local_ips),
+            )
+        conn.commit()
 
 
 if __name__ == "__main__":

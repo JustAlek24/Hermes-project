@@ -5,6 +5,7 @@ import uuid
 
 from app import transfer
 from data import database as db
+from network import get_local_ips
 from protocol import handler
 
 
@@ -60,12 +61,20 @@ class HermesApp:
             self.my_peer_id = uuid.uuid4().hex
             self.my_peer_name = self.config.peer_name or self.my_peer_id
             db.save_identity(self.db, self.my_peer_id, self.my_peer_name)
+        # Убираем мусор от общего/старого peers.db: записи про самих себя.
+        db.remove_self_peers(
+            self.db, self.my_peer_id, [ip for _, ip in get_local_ips()]
+        )
         self._peer_status = {}
         self.pending_acks = {}
         # peer_id → writer сокета, на котором пришёл META. По нему отвечаем
         # ACK/REJECT и чанками — не нужно открывать встречное подключение,
         # которое падает за NAT/файрволом и на котором зависала вся передача.
         self._incoming_connections = {}
+        # transfer_id → writer, привязанный к конкретной передаче (тот сокет,
+        # на котором пришёл именно этот META). Не даём ACK уйти на чужой сокет,
+        # если пир открыл новое подключение, пока ещё идёт старая передача.
+        self._transfer_writers = {}
         # id(reader) → задача, читающая ответы пира на исходящем подключении
         # (ACK/REJECT/ERROR приходят по тому же сокету, куда мы пишем данные).
         self._outbound_readers = {}
@@ -166,7 +175,7 @@ class HermesApp:
         self.pending_acks.pop(key, None)
         return (False, None)
 
-    def add_incoming_transfer(self, meta, peer_id):
+    def add_incoming_transfer(self, meta, peer_id, writer=None):
         peer = db.get_peer(self.db, peer_id)
         peer_name = peer["peer_name"] if peer else peer_id
         transfer_id = uuid.uuid4().hex
@@ -185,6 +194,10 @@ class HermesApp:
         self._transfers.insert(0, transfer_record)
         self._transfers = list(self._transfers)
         transfer.init_receive_buffer(peer_id, transfer_record)
+        # Привязываем передачу к сокету, на котором пришёл META. ACK/DONE затем
+        # уходят именно по нему, а не по «последнему» сокету этого пира.
+        if writer is not None:
+            self._transfer_writers[transfer_id] = writer
         if self._on_new_incoming:
             self._on_new_incoming(transfer_record)
         if self._on_transfer_changed:
@@ -198,6 +211,13 @@ class HermesApp:
     def update_transfer_status(self, peer_id, status):
         for t in self._transfers:
             if t["peer_id"] == peer_id:
+                t["status"] = status
+        if self._on_transfer_changed:
+            self._on_transfer_changed()
+
+    def update_transfer_status_by_id(self, transfer_id, status):
+        for t in self._transfers:
+            if t["transfer_id"] == transfer_id:
                 t["status"] = status
         if self._on_transfer_changed:
             self._on_transfer_changed()

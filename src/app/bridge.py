@@ -123,7 +123,12 @@ class AppBridge(QObject):
             if t["transfer_id"] == transfer_id:
                 t["status"] = "accepted"
                 logger.info("ACCEPT transfer=%s peer=%s", str(transfer_id)[:8], str(t["peer_id"])[:8])
-                writer = self._get_incoming_writer(t["peer_id"])
+                # Writer, привязанный к этой передаче (сокет, на котором пришёл
+                # META), приоритетнее «последнего» сокета пира: по нему шлём
+                # ACK и по нему же ждём чанки.
+                writer = self.core._transfer_writers.get(
+                    transfer_id, self._get_incoming_writer(t["peer_id"])
+                )
                 coro1 = self._send_ack_async(t["peer_id"], writer)
                 coro2 = self._receive_async(t["peer_id"], transfer_id, writer)
                 if self._loop:
@@ -148,7 +153,9 @@ class AppBridge(QObject):
         for t in self.core._transfers:
             if t["transfer_id"] == transfer_id:
                 t["status"] = "rejected"
-                writer = self._get_incoming_writer(t["peer_id"])
+                writer = self.core._transfer_writers.pop(
+                    transfer_id, self._get_incoming_writer(t["peer_id"])
+                )
                 coro = self._send_reject_async(t["peer_id"], writer)
                 if self._loop:
                     asyncio.run_coroutine_threadsafe(coro, self._loop)
@@ -197,16 +204,22 @@ class AppBridge(QObject):
             self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
 
-        reader, writer = await connect.connect_to_peer(ip, port)
+        # Свежий сокет на каждую передачу (force=True): переиспользование
+        # кэшированного соединения падало на полусломанных сокетах — запись
+        # «успешно» уходила в никуда и отправитель вечно ждал ACK.
+        reader, writer = await connect.connect_to_peer(ip, port, force=True)
         if reader is None or writer is None:
             logger.error("SEND_CONNECT_FAILED ip=%s port=%s", ip, port)
             self._mark_output_status(transfer_id, "failed")
             return
 
         connection = (reader, writer)
-        ok, reason = await transfer.send_file(
-            connection, file_path, peer_id, self.core, progress_callback=on_progress
-        )
+        try:
+            ok, reason = await transfer.send_file(
+                connection, file_path, peer_id, self.core, progress_callback=on_progress
+            )
+        finally:
+            await connect.close_connection(ip, port, writer)
         self._transfer_progress.pop(transfer_id, None)
         self.transferProgressChanged.emit()
         logger.info("SEND_DONE ok=%s reason=%s transfer=%s", ok, reason, str(transfer_id)[:8])
@@ -307,9 +320,13 @@ class AppBridge(QObject):
             self._transfer_progress[transfer_id] = percent
             self.transferProgressChanged.emit()
 
-        ok, reason = await transfer.recive_files(
-            peer_id, writer, self, output_dir, progress_callback=on_progress
-        )
+        try:
+            ok, reason = await transfer.recive_files(
+                peer_id, writer, self, output_dir,
+                progress_callback=on_progress, transfer_id=transfer_id,
+            )
+        finally:
+            self.core._transfer_writers.pop(transfer_id, None)
         logger.info("RECV_DONE ok=%s reason=%s", ok, reason)
         self._transfer_progress.pop(transfer_id, None)
         self.transferProgressChanged.emit()

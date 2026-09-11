@@ -110,6 +110,26 @@ async def connect_to_peer(ip, port, force=False):
         return reader, writer
 
 
+async def close_connection(ip, port, writer=None):
+    """Закрывает соединение и убирает его из кэша.
+
+    writer передаётся, чтобы не убивать стороннее соединение: если в кэше уже
+    лежит другое (например, параллельная передача тому же пиру), трогаем только
+    свой сокет."""
+    key = (ip, port)
+    entry = _connections.get(key)
+    if entry is not None and (writer is None or entry[1] is writer):
+        _connections.pop(key, None)
+    if writer is None:
+        return
+    if not writer.is_closing():
+        writer.close()
+    try:
+        await writer.wait_closed()
+    except (ConnectionResetError, OSError):
+        pass
+
+
 async def read_outgoing_stream(reader, app, writer=None):
     """Читает ответы пира на исходящем подключении (ACK/REJECT/ERROR/DONE).
 
@@ -145,7 +165,9 @@ async def read_outgoing_stream(reader, app, writer=None):
 
 async def send_message(writer, message_json):
     try:
-        if writer.is_closing():
+        # Страховка от передачи кортежа (reader, writer) вместо writer —
+        # такое уже падало в send_message (AttributeError: 'tuple').
+        if not hasattr(writer, "is_closing") or writer.is_closing():
             return False
         logger.debug("SEND type=%s peer=%s", message_json.get("type"), str(message_json.get("peer_id"))[:8])
         json_line = json.dumps(message_json, ensure_ascii=False)

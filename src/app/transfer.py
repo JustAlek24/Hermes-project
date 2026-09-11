@@ -113,7 +113,10 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
     return (True, None)
 
 
-async def recive_files(peer_id, writer, app, output_dir, progress_callback=None):
+async def recive_files(
+    peer_id, writer, app, output_dir, progress_callback=None, transfer_id=None,
+    chunk_timeout=120,
+):
     # Дата приходить либо напрямую (HermesApp), либо через мост (AppBridge у
     # которого реальный контур лежит в .core). В мост нет ни my_peer_id, ни
     # update_transfer_status — без этого DONE-подтверждение не ушло бы и
@@ -131,9 +134,32 @@ async def recive_files(peer_id, writer, app, output_dir, progress_callback=None)
     filename = meta["filename"]
     logger.info("RECV_START file=%s chunks=%d peer=%s", filename, chunks_count, str(peer_id)[:8])
 
+    def set_status(status):
+        if transfer_id:
+            core.update_transfer_status_by_id(transfer_id, status)
+        else:
+            core.update_transfer_status(peer_id, status)
+
     chunks = {}
     for i in range(chunks_count):
-        chunk_id, content = await queue.get()
+        try:
+            chunk_id, content = await asyncio.wait_for(queue.get(), chunk_timeout)
+        except asyncio.TimeoutError:
+            # Отправитель молчит — раньше приёмник висел на queue.get() вечно:
+            # полоска стояла на 0%, файл не собирался, и никто не узнавал.
+            # Шлём ERROR, чтобы и отправитель отвалился с понятной ошибкой.
+            await connect.send_message(
+                writer,
+                messages.create_error(
+                    core.my_peer_id, "TIMEOUT", f"Таймаут ожидания чанка #{i}"
+                ),
+            )
+            if transfer_id:
+                core._transfer_writers.pop(transfer_id, None)
+            _receive_buffers.pop(peer_id, None)
+            set_status("error")
+            logger.warning("RECV_TIMEOUT chunk=%d peer=%s", i, str(peer_id)[:8])
+            return (False, f"Таймаут ожидания чанка #{i}")
         chunks[chunk_id] = base64.b64decode(content)
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
@@ -149,7 +175,7 @@ async def recive_files(peer_id, writer, app, output_dir, progress_callback=None)
             writer, messages.create_ack(core.my_peer_id, "DONE")
         )
         logger.info("RECV_DONE_OK file=%s peer=%s", filename, str(peer_id)[:8])
-        core.update_transfer_status(peer_id, "completed")
+        set_status("completed")
         return (True, output_path)
     else:
         await connect.send_message(
@@ -159,7 +185,7 @@ async def recive_files(peer_id, writer, app, output_dir, progress_callback=None)
             ),
         )
         logger.warning("RECV_CHECKSUM_MISMATCH file=%s peer=%s", filename, str(peer_id)[:8])
-        core.update_transfer_status(peer_id, "error")
+        set_status("error")
         return (False, "SHA256 не совпадает")
 
 

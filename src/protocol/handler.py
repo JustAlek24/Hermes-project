@@ -93,7 +93,7 @@ def handle_message(parsed, app, sender_ip=None, writer=None):
         # соединение к отправителю (за NAT/файрволом оно не проходит).
         if writer is not None and not writer.is_closing():
             app._incoming_connections[peer_id] = writer
-        app.add_incoming_transfer(parsed.get("data"), peer_id)
+        app.add_incoming_transfer(parsed.get("data"), peer_id, writer=writer)
 
     elif msg_type == "FILE_CHUNK":
         valid, _ = sec.validate_message(parsed)
@@ -101,6 +101,10 @@ def handle_message(parsed, app, sender_ip=None, writer=None):
             return
         chunk_id = parsed["data"].get("chunk_id")
         content = parsed["data"].get("content")
+        # Обновляем канал ответа на тот сокет, с которого реально приходит
+        # чанк: чанк мог прийти по новому подключению не того, что META.
+        if writer is not None and not writer.is_closing():
+            app._incoming_connections[peer_id] = writer
         app.receive_chunk(peer_id, chunk_id, content)
 
     elif msg_type == "REJECT":
