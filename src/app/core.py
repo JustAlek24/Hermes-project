@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import socket
 import time
 import uuid
@@ -6,6 +7,8 @@ import uuid
 from app import transfer
 from data import database as db
 from protocol import handler
+
+logger = logging.getLogger(__name__)
 
 
 class _Pending:
@@ -45,33 +48,24 @@ class HermesApp:
         self.db = conn
         self._loop = loop
         self.config = config if config is not None else Config()
-        # Идентичность (peer_id/peer_name) переживает перезапуски: хранится в БД.
-        # Раньше peer_id генерировался заново при каждом старте, из-за чего на
-        # пирах копились дубликаты одной и той же машины.
+        
         ident = db.get_identity(self.db)
         if ident and ident.get("peer_id"):
             self.my_peer_id = ident["peer_id"]
-            self.my_peer_name = (
-                ident.get("peer_name")
-                or self.config.peer_name
-                or ident["peer_id"]
-            )
+            self.my_peer_name = ident.get("peer_name") or self.config.peer_name or ident["peer_id"]
         else:
             self.my_peer_id = uuid.uuid4().hex
             self.my_peer_name = self.config.peer_name or self.my_peer_id
             db.save_identity(self.db, self.my_peer_id, self.my_peer_name)
+            
         self._peer_status = {}
         self.pending_acks = {}
-        # peer_id → writer сокета, на котором пришёл META. По нему отвечаем
-        # ACK/REJECT и чанками — не нужно открывать встречное подключение,
-        # которое падает за NAT/файрволом и на котором зависала вся передача.
         self._incoming_connections = {}
-        # id(reader) → задача, читающая ответы пира на исходящем подключении
-        # (ACK/REJECT/ERROR приходят по тому же сокету, куда мы пишем данные).
         self._outbound_readers = {}
         self._transfers = []
         self.transfer_queue = []
         self.tcp_connections = []
+        
         self._on_transfer_changed = on_transfer_changed
         self._on_chunk_ack = on_chunk_ack
         self._on_new_incoming = None
@@ -114,20 +108,36 @@ class HermesApp:
 
     def register_pending(self, msg_type, peer_id, chunk_id=None):
         key = (peer_id, msg_type, chunk_id)
-
+        logger.info(f"🔑 register_pending: key={key}")
         self.pending_acks[key] = _Pending()
-
         return key
 
+    # 🔥 ИСПРАВЛЕНО: "Умный" поиск, если peer_id рассинхронизирован
     def resolve_pending(self, msg_type, peer_id, chunk_id=None):
-        pending = self.pending_acks.get((peer_id, msg_type, chunk_id))
+        key = (peer_id, msg_type, chunk_id)
+        logger.info(f"🔍 resolve_pending: ищу key={key}")
+        
+        pending = self.pending_acks.get(key)
+        
+        if pending is None:
+            logger.warning(f"⚠️ Точный ключ не найден. Ищу по msg_type='{msg_type}' и chunk_id={chunk_id} (возможна рассинхронизация peer_id в БД)")
+            for (p_id, m_type, c_id), p in self.pending_acks.items():
+                if m_type == msg_type and c_id == chunk_id:
+                    logger.info(f"✅ Найдено совпадение! Использую peer_id='{p_id}' вместо '{peer_id}'")
+                    pending = p
+                    key = (p_id, m_type, c_id)
+                    break
 
-        if pending is not None:
-            pending.event.set()
+        if pending is None:
+            logger.error(f"❌ Ключ так и не найден в pending_acks!")
+            return
+        
+        logger.info(f"✅ Ключ найден, вызываю event.set()")
+        pending.event.set()
+        logger.info(f"✅ event.set() выполнен")
 
     def reject_pending(self, peer_id):
         pending = self.pending_acks.get((peer_id, "META", None))
-
         if pending is not None:
             pending.rejected = True
             pending.event.set()
@@ -138,31 +148,37 @@ class HermesApp:
                 pending.error = True
                 pending.event.set()
 
-    async def wait_for_ack(
-        self, msg_type, peer_id, chunk_id=None, timeout=10, max_retries=3, resend=None
-    ):
+    async def wait_for_ack(self, msg_type, peer_id, chunk_id=None, timeout=10, max_retries=3, resend=None):
         key = (peer_id, msg_type, chunk_id)
-
+        logger.info(f"⏳ wait_for_ack: key={key}, timeout={timeout}")
+        
         for i in range(max_retries):
             pending = self.pending_acks.get(key)
-
             if pending is None:
+                logger.error(f"❌ wait_for_ack: pending is None для key={key}")
                 return (False, None)
-
+            
+            logger.info(f"🔄 Попытка {i+1}/{max_retries}: жду event.wait()")
             try:
                 await asyncio.wait_for(pending.event.wait(), timeout)
+                logger.info(f"✅ event.wait() разблокирован!")
             except asyncio.TimeoutError:
+                logger.warning(f"⏰ Таймаут на попытке {i+1}")
                 if resend is not None:
                     resend()
                 continue
             else:
                 self.pending_acks.pop(key, None)
                 if pending.rejected:
+                    logger.info(f"❌ Получен REJECT")
                     return (False, "REJECT")
                 if pending.error:
+                    logger.info(f"❌ Получен ERROR")
                     return (False, "ERROR")
+                logger.info(f"✅ ACK получен успешно")
                 return (True, None)
-
+        
+        logger.error(f"❌ Все {max_retries} попыток исчерпаны")
         self.pending_acks.pop(key, None)
         return (False, None)
 

@@ -56,12 +56,14 @@ def put_chunk(peer_id, chunk_id, content):
 
 async def send_file(connection, filepath, recipient_id, app, progress_callback=None):
     reader = connection[0]
+    logger.info(">>> [TRANSFER] 1. Начинаю чтение файла...")
     chunks, file_sha = chunk_file(filepath)
     my_peer_id = app.my_peer_id
     filename = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
     chunks_count = len(chunks)
-    logger.info("SEND_START file=%s chunks=%d size=%d recipient=%s", filename, chunks_count, file_size, str(recipient_id)[:8])
+    logger.info(f">>> [TRANSFER] 2. Файл прочитан: {chunks_count} чанков, размер {file_size}")
+
     meta = messages.create_meta(
         my_peer_id,
         app.my_peer_name,
@@ -71,45 +73,66 @@ async def send_file(connection, filepath, recipient_id, app, progress_callback=N
         file_sha,
         app.config.port,
     )
-    # Ответы пира (ACK/REJECT/ERROR) приходят по тому же сокету, в который мы
-    # пишем файл. Слушаем его в фоне — иначе ACK-и никто не обработает и
-    # отправка зависнет на ожидании подтверждения META / чанков / DONE.
+    logger.info(">>> [TRANSFER] 3. Сообщение META создано")
+
     if id(reader) not in app._outbound_readers or app._outbound_readers[id(reader)].done():
+        logger.info(">>> [TRANSFER] 4. Запускаю фоновое чтение исходящего потока (read_outgoing_stream)")
         app._outbound_readers[id(reader)] = asyncio.create_task(
             connect.read_outgoing_stream(reader, app, writer=connection[1])
         )
+
+    logger.info(">>> [TRANSFER] 5. Регистрирую ожидание ACK на META")
     app.register_pending("META", recipient_id)
+
+    logger.info(">>> [TRANSFER] 6. Отправляю META в сокет...")
     sent = await connect.send_message(connection[1], meta)
+    logger.info(f">>> [TRANSFER] 7. Результат отправки META: sent={sent}")
+
     if not sent:
+        logger.error(">>> [TRANSFER] ОШИБКА: Соединение потеряно при отправке META")
         return (False, "Соединение потеряно")
+
+    logger.info(">>> [TRANSFER] 8. НАЧИНАЮ ОЖИДАНИЕ ACK НА META (таймаут 120с)...")
     ok, status = await app.wait_for_ack("META", recipient_id, timeout=120)
+    logger.info(f">>> [TRANSFER] 9. ОЖИДАНИЕ ЗАВЕРШЕНО: ok={ok}, status={status}")
+
     if not ok:
+        logger.error(f">>> [TRANSFER] КРИТИЧЕСКАЯ ОШИБКА: ACK на META не получен или отклонен. status={status}")
         return (False, "Отказано" if status == "REJECT" else "Адресат не отвечает")
-    # DONE-подтверждение регистрируем ДО цикла чанков: приёмник шлёт его сразу
-    # после сборки файла и может успеть раньше, чем отправитель дойдёт до этого
-    # места. Если регистрировать после цикла — подтверждение «улетит впустую»,
-    # не найдя ожидающего, и передача зависнет на «Файл не подтверждён».
+
+    logger.info(">>> [TRANSFER] 10. УСПЕХ! Начинаю цикл отправки чанков...")
     done_key = app.register_pending("DONE", recipient_id)
+
     for i in range(chunks_count):
+        logger.info(f">>> [TRANSFER] 11. Подготовка чанка {i+1}/{chunks_count}")
         chunk_msg = messages.create_file_chunk(
             my_peer_id, i, base64.b64encode(chunks[i]).decode()
         )
+        logger.info(f">>> [TRANSFER] 12. Регистрирую ожидание ACK на чанк {i}")
         app.register_pending("FILE_CHUNK", recipient_id, chunk_id=i)
+
+        logger.info(f">>> [TRANSFER] 13. Отправляю FILE_CHUNK {i} в сокет...")
         await connect.send_message(connection[1], chunk_msg)
-        ok, _ = await app.wait_for_ack(
-            "FILE_CHUNK", recipient_id, chunk_id=i, timeout=10
-        )
+
+        logger.info(f">>> [TRANSFER] 14. Жду ACK на чанк {i} (таймаут 10с)...")
+        ok, _ = await app.wait_for_ack("FILE_CHUNK", recipient_id, chunk_id=i, timeout=10)
+        logger.info(f">>> [TRANSFER] 15. Результат ожидания чанка {i}: ok={ok}")
+
         if not ok:
             app.pending_acks.pop(done_key, None)
-            logger.warning("CHUNK_FAILED chunk=%d recipient=%s", i, str(recipient_id)[:8])
+            logger.warning(f">>> [TRANSFER] ОШИБКА: Чанк #{i} не доставлен")
             return (False, f"Чанк #{i} не доставлен")
+
         if progress_callback:
             progress_callback((i + 1) / chunks_count * 100)
+
+    logger.info(">>> [TRANSFER] 16. Все чанки отправлены, жду финального DONE...")
     ok, _ = await app.wait_for_ack("DONE", recipient_id, timeout=60)
     if not ok:
-        logger.warning("DONE_NOT_ACKED recipient=%s", str(recipient_id)[:8])
+        logger.warning(">>> [TRANSFER] ОШИБКА: Файл не подтверждён (DONE)")
         return (False, "Файл не подтверждён")
-    logger.info("SEND_DONE_OK recipient=%s", str(recipient_id)[:8])
+
+    logger.info(">>> [TRANSFER] 17. ПЕРЕДАЧА УСПЕШНО ЗАВЕРШЕНА!")
     return (True, None)
 
 

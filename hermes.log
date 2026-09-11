@@ -303,3 +303,379 @@ Traceback (most recent call last):
 AttributeError: 'tuple' object has no attribute 'is_closing'
 2026-09-07 00:42:22,484 INFO [app.bridge] RECV_START peer=6c246a86 transfer=5d857799 save_dir=C:/Users/User-PC/Downloads
 2026-09-07 00:42:22,484 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=6c246a86
+2026-09-11 23:21:57,259 INFO [network.connection] RECV type=META peer=6c246a86 from=192.168.1.157 size=295
+2026-09-11 23:22:22,246 INFO [app.bridge] ACCEPT transfer=45a40ce6 peer=6c246a86
+2026-09-11 23:22:22,247 INFO [app.bridge] RECV_START peer=6c246a86 transfer=45a40ce6 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-11 23:22:22,247 INFO [app.transfer] RECV_START file=Добро пожаловать.md chunks=1 peer=6c246a86
+2026-09-11 23:25:07,033 WARNING [app.bridge] SEND_ABORT ip belongs to self ip=127.0.0.1
+2026-09-11 23:27:07,966 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:29:11,224 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:31:03,512 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-11 23:31:13,257 INFO [app.bridge] ACCEPT transfer=52768e8d peer=64a3c0a6
+2026-09-11 23:31:13,258 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=52768e8d save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-11 23:31:13,258 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-11 23:31:14,364 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:31:16,089 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:32:16,114 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:32:56,453 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:33:16,129 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:33:45,445 INFO [app.bridge] SEND_REQUEST peer=64a3c0a6 ip=192.168.1.157 port=65432 file=C:/Users/junes/Desktop/Конспект 03.09.docx
+2026-09-11 23:34:02,144 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:34:06,488 ERROR [app.bridge] SEND_CONNECT_FAILED ip=192.168.1.157 port=65432
+2026-09-11 23:34:10,520 INFO [app.bridge] SEND_REQUEST peer=64a3c0a6 ip=192.168.1.157 port=65432 file=C:/Users/junes/Desktop/Конспект 03.09.docx
+2026-09-11 23:34:31,550 ERROR [app.bridge] SEND_CONNECT_FAILED ip=192.168.1.157 port=65432
+2026-09-11 23:34:34,173 INFO [app.bridge] SEND_REQUEST peer=64a3c0a6 ip=192.168.1.157 port=65432 file=C:/Users/junes/Desktop/Конспект 03.09.docx
+2026-09-11 23:34:55,217 ERROR [app.bridge] SEND_CONNECT_FAILED ip=192.168.1.157 port=65432
+2026-09-11 23:34:59,587 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:35:02,193 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:35:40,768 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:36:02,237 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:36:05,194 WARNING [app.bridge] SEND_ABORT ip belongs to self ip=127.0.0.1
+2026-09-11 23:36:40,696 INFO [app.bridge] SEND_REQUEST peer=64a3c0a6 ip=192.168.1.157 port=65432 file=C:/Users/junes/Desktop/Конспект-03.09.pdf
+2026-09-11 23:36:53,001 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-11 23:37:01,724 ERROR [app.bridge] SEND_CONNECT_FAILED ip=192.168.1.157 port=65432
+2026-09-11 23:37:01,771 INFO [app.bridge] ACCEPT transfer=0a22a68e peer=64a3c0a6
+2026-09-11 23:37:01,772 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=0a22a68e save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-11 23:37:01,772 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-11 23:37:02,281 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:37:02,724 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:37:07,788 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:37:09,661 INFO [network.connection] RECV type=HEARTBEAT peer=6c246a86 from=127.0.0.1 size=105
+2026-09-11 23:38:02,322 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-11 23:38:42,985 ERROR [asyncio] Unhandled exception in event loop: Task was destroyed but it is pending!
+2026-09-12 01:01:19,807 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:01:35,765 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:01:42,891 INFO [app.bridge] ACCEPT transfer=76071abb peer=64a3c0a6
+2026-09-12 01:01:42,892 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=76071abb save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:01:42,892 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:02:31,871 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:02:49,023 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:03:02,802 INFO [app.bridge] ACCEPT transfer=34f23afa peer=64a3c0a6
+2026-09-12 01:03:02,803 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=34f23afa save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:03:02,803 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:03:31,956 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:04:32,072 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:05:32,095 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:06:32,128 INFO [network.connection] RECV type=HEARTBEAT peer=64a3c0a6 from=192.168.1.157 size=105
+2026-09-12 01:24:20,597 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:24:43,775 INFO [network.connection] Подключился клиент: ('192.168.1.157', 57798)
+2026-09-12 01:24:43,776 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:24:43,776 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:24:43,776 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:24:49,638 INFO [network.connection] Подключился клиент: ('192.168.1.157', 43642)
+2026-09-12 01:24:49,638 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:24:49,638 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:24:49,638 ERROR [network.connection] Не удалось отправить сообщение
+Traceback (most recent call last):
+  File "c:\Users\junes\Documents\GitHub\Hermes-project\src\.\network\connection.py", line 173, in send_message
+    json_line = json.dumps(message_json, ensure_ascii=False)
+                ^^^^
+NameError: name 'json' is not defined. Did you forget to import 'json'?
+2026-09-12 01:24:51,022 INFO [app.bridge] ACCEPT transfer=1aa53b93 peer=64a3c0a6
+2026-09-12 01:24:51,022 ERROR [network.connection] Не удалось отправить сообщение
+Traceback (most recent call last):
+  File "c:\Users\junes\Documents\GitHub\Hermes-project\src\.\network\connection.py", line 173, in send_message
+    json_line = json.dumps(message_json, ensure_ascii=False)
+                ^^^^
+NameError: name 'json' is not defined. Did you forget to import 'json'?
+2026-09-12 01:24:51,023 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=1aa53b93 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:24:51,023 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:24:54,647 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:24:54,648 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:26:22,750 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:26:33,888 INFO [network.connection] Подключился клиент: ('192.168.1.157', 52920)
+2026-09-12 01:26:33,889 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:26:33,889 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:26:33,900 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:26:33,900 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:26:44,355 INFO [network.connection] Подключился клиент: ('192.168.1.157', 50394)
+2026-09-12 01:26:44,358 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:26:44,358 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:26:44,358 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:26:51,475 INFO [app.bridge] ACCEPT transfer=57c5e683 peer=64a3c0a6
+2026-09-12 01:26:51,475 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=57c5e683 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:26:51,476 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:27:19,652 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:27:24,954 INFO [network.connection] Подключился клиент: ('192.168.1.157', 48306)
+2026-09-12 01:27:24,954 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:27:24,954 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:27:24,981 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:27:24,981 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:27:40,731 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:27:54,040 INFO [network.connection] Подключился клиент: ('192.168.1.157', 37938)
+2026-09-12 01:27:54,042 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:27:54,042 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:27:54,042 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:28:09,586 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:28:09,586 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:28:09,586 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:28:17,117 INFO [app.bridge] ACCEPT transfer=20279d2e peer=64a3c0a6
+2026-09-12 01:28:17,117 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=20279d2e save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:28:17,118 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:28:24,996 INFO [network.connection] Подключился клиент: ('192.168.1.157', 43506)
+2026-09-12 01:28:24,996 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:28:24,996 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:28:25,023 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:28:25,024 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:29:25,034 INFO [network.connection] Подключился клиент: ('192.168.1.157', 48150)
+2026-09-12 01:29:25,035 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:29:25,035 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:29:25,046 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:29:25,046 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:30:13,709 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:30:21,727 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:30:25,059 INFO [network.connection] Подключился клиент: ('192.168.1.157', 36048)
+2026-09-12 01:30:25,060 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:30:25,060 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:30:25,060 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:30:25,086 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:30:25,087 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:30:34,128 INFO [network.connection] Подключился клиент: ('192.168.1.157', 36062)
+2026-09-12 01:30:34,129 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:30:34,129 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:30:34,129 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:30:34,129 INFO [protocol.handler] handle_message: type=META, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:30:34,142 INFO [protocol.handler] Сохранен writer для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:30:34,142 INFO [protocol.handler] Отправляю ACK на META для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:30:40,225 INFO [app.bridge] ACCEPT transfer=ff3f9bae peer=64a3c0a6
+2026-09-12 01:30:40,225 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=ff3f9bae save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:30:40,225 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:37:50,773 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:37:54,233 INFO [network.connection] Подключился клиент: ('192.168.1.157', 53562)
+2026-09-12 01:37:54,234 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:37:54,234 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:37:54,234 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:37:54,261 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:37:54,261 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:38:01,362 INFO [network.connection] Подключился клиент: ('192.168.1.157', 55810)
+2026-09-12 01:38:01,363 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:38:01,363 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:38:01,363 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:38:01,363 INFO [protocol.handler] handle_message: type=META, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:38:01,370 INFO [protocol.handler] Сохранен writer для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:38:01,371 INFO [protocol.handler] Отправляю ACK на META для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:38:07,409 INFO [app.bridge] ACCEPT transfer=37a9e9e5 peer=64a3c0a6
+2026-09-12 01:38:07,410 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=37a9e9e5 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:38:07,410 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:38:54,268 INFO [network.connection] Подключился клиент: ('192.168.1.157', 55038)
+2026-09-12 01:38:54,268 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:38:54,268 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:38:54,268 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:38:54,278 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:38:54,278 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:39:54,285 INFO [network.connection] Подключился клиент: ('192.168.1.157', 38504)
+2026-09-12 01:39:54,285 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:39:54,285 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:39:54,285 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:39:54,294 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:39:54,294 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:40:54,301 INFO [network.connection] Подключился клиент: ('192.168.1.157', 38190)
+2026-09-12 01:40:54,301 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:40:54,301 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:40:54,301 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:40:54,313 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:40:54,313 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:41:15,871 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:41:15,871 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: 64a3c0a631bb4ab49e26cdcda511a5ee)
+2026-09-12 01:41:15,871 INFO [network.connection] Удален peer_id 64a3c0a631bb4ab49e26cdcda511a5ee из _incoming_connections
+2026-09-12 01:41:24,955 INFO [network.connection] Подключился клиент: ('192.168.1.157', 45188)
+2026-09-12 01:41:24,955 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:41:24,955 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:41:24,955 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:41:25,021 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:41:25,021 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:41:28,472 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:41:36,960 INFO [network.connection] Подключился клиент: ('192.168.1.157', 39034)
+2026-09-12 01:41:36,962 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:41:36,962 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:41:36,962 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:41:36,962 INFO [protocol.handler] handle_message: type=META, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:41:36,975 INFO [protocol.handler] Сохранен writer для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:41:36,976 INFO [protocol.handler] Отправляю ACK на META для peer_id=64a3c0a631bb4ab49e26cdcda511a5ee
+2026-09-12 01:41:43,122 INFO [app.bridge] ACCEPT transfer=753b6729 peer=64a3c0a6
+2026-09-12 01:41:43,123 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=753b6729 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:41:43,123 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:42:25,029 INFO [network.connection] Подключился клиент: ('192.168.1.157', 38530)
+2026-09-12 01:42:25,050 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:42:25,051 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:42:25,051 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer_id=64a3c0a631bb4ab49e26cdcda511a5ee, writer=есть
+2026-09-12 01:42:25,130 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:42:25,130 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:46:46,013 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:46:48,955 INFO [network.connection] Подключился клиент: ('192.168.1.157', 58778)
+2026-09-12 01:46:48,956 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:46:48,956 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:46:48,956 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:46:48,964 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:46:48,965 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:46:56,549 INFO [network.connection] Подключился клиент: ('192.168.1.157', 53084)
+2026-09-12 01:46:56,550 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:46:56,550 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:46:56,550 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:46:56,550 INFO [protocol.handler] handle_message: type=META, peer=64a3c0a6, writer=есть
+2026-09-12 01:46:56,563 INFO [protocol.handler] ✅ Сохранен writer для peer_id=64a3c0a6
+2026-09-12 01:46:56,563 INFO [protocol.handler] 📤 Отправляю ACK на META для peer_id=64a3c0a6
+2026-09-12 01:47:01,984 INFO [app.bridge] ACCEPT transfer=35d73709 peer=64a3c0a6
+2026-09-12 01:47:01,984 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=35d73709 save_dir=C:/Users/junes/Desktop/learning_go
+2026-09-12 01:47:01,984 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:47:48,972 INFO [network.connection] Подключился клиент: ('192.168.1.157', 54104)
+2026-09-12 01:47:48,972 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:47:48,972 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:47:48,972 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:47:48,981 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:47:48,981 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:48:48,988 INFO [network.connection] Подключился клиент: ('192.168.1.157', 52350)
+2026-09-12 01:48:48,988 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:48:48,988 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:48:48,989 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:48:48,998 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:48:48,998 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:49:49,005 INFO [network.connection] Подключился клиент: ('192.168.1.157', 54174)
+2026-09-12 01:49:49,005 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:49:49,005 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:49:49,005 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:49:49,015 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:49:49,015 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:51:04,830 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 01:51:08,540 INFO [network.connection] Подключился клиент: ('192.168.1.157', 41602)
+2026-09-12 01:51:08,541 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:51:08,541 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:51:08,541 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:51:08,550 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:51:08,550 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:51:11,526 INFO [network.connection] Подключился клиент: ('192.168.1.157', 50066)
+2026-09-12 01:51:11,526 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:51:11,526 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:51:11,526 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:51:11,689 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:51:11,690 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:51:17,466 INFO [network.connection] Подключился клиент: ('192.168.1.157', 60706)
+2026-09-12 01:51:17,468 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 01:51:17,468 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 01:51:17,468 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:51:17,468 INFO [protocol.handler] handle_message: type=META, peer=64a3c0a6, writer=есть
+2026-09-12 01:51:17,475 INFO [protocol.handler] ✅ Сохранен writer для peer_id=64a3c0a6
+2026-09-12 01:51:17,476 INFO [protocol.handler] 📤 Отправляю ACK на META для peer_id=64a3c0a6
+2026-09-12 01:51:23,440 INFO [app.bridge] ACCEPT transfer=4421d9ea peer=64a3c0a6
+2026-09-12 01:51:23,440 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=4421d9ea save_dir=C:/Users/junes/Desktop/learning_python
+2026-09-12 01:51:23,441 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 01:52:11,695 INFO [network.connection] Подключился клиент: ('192.168.1.157', 60038)
+2026-09-12 01:52:11,696 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:52:11,696 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:52:11,696 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:52:11,706 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:52:11,706 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:53:11,726 INFO [network.connection] Подключился клиент: ('192.168.1.157', 34482)
+2026-09-12 01:53:11,726 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:53:11,726 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:53:11,726 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:53:11,737 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:53:11,737 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:54:11,752 INFO [network.connection] Подключился клиент: ('192.168.1.157', 54698)
+2026-09-12 01:54:11,754 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:54:11,754 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:54:11,754 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:54:11,787 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:54:11,787 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:55:11,799 INFO [network.connection] Подключился клиент: ('192.168.1.157', 41300)
+2026-09-12 01:55:11,799 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:55:11,800 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:55:11,800 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:55:11,825 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:55:11,825 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:56:11,840 INFO [network.connection] Подключился клиент: ('192.168.1.157', 47470)
+2026-09-12 01:56:11,840 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:56:11,840 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:56:11,840 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:56:11,848 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:56:11,849 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:57:11,862 INFO [network.connection] Подключился клиент: ('192.168.1.157', 33124)
+2026-09-12 01:57:11,863 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:57:11,863 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:57:11,863 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:57:11,872 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:57:11,872 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 01:58:11,884 INFO [network.connection] Подключился клиент: ('192.168.1.157', 48974)
+2026-09-12 01:58:11,884 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 01:58:11,884 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 01:58:11,884 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 01:58:11,916 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 01:58:11,916 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:04:32,357 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 02:08:16,679 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 02:08:16,834 INFO [network.connection] Подключился клиент: ('192.168.1.157', 51498)
+2026-09-12 02:08:16,835 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:08:16,835 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:08:16,835 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:08:16,860 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:08:16,860 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:08:23,242 INFO [network.connection] Подключился клиент: ('192.168.1.157', 53520)
+2026-09-12 02:08:41,286 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:08:41,286 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:08:46,118 INFO [network.connection] Подключился клиент: ('192.168.1.157', 50724)
+2026-09-12 02:08:46,118 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:08:46,118 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:08:46,118 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:08:46,146 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:08:46,146 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:08:53,732 INFO [network.connection] Подключился клиент: ('192.168.1.157', 50728)
+2026-09-12 02:09:06,786 INFO [app.bridge] SEND_REQUEST peer=64a3c0a6 ip=192.168.1.157 port=65432 file=C:/Users/junes/Documents/GitHub/Hermes-project/README.md
+2026-09-12 02:09:06,787 INFO [network.connection] Попытка подключения к 192.168.1.157:65432...
+2026-09-12 02:09:17,057 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:09:17,057 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:09:27,828 ERROR [network.connection] Не удалось подключиться к 192.168.1.157:65432: [WinError 121] Превышен таймаут семафора
+2026-09-12 02:09:27,829 ERROR [app.bridge] SEND_CONNECT_FAILED ip=192.168.1.157 port=65432
+2026-09-12 02:14:40,247 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 02:14:41,220 INFO [network.connection] Подключился клиент: ('192.168.1.157', 49108)
+2026-09-12 02:14:41,221 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:14:41,221 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:14:41,221 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:14:41,230 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:14:41,230 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:14:48,674 INFO [network.connection] Подключился клиент: ('192.168.1.157', 53328)
+2026-09-12 02:14:48,677 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 02:14:48,677 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 02:14:48,677 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:14:48,677 INFO [protocol.handler] handle_message: type=META, peer=64a3c0a6, writer=есть
+2026-09-12 02:14:48,690 INFO [protocol.handler] ✅ Сохранен writer для peer_id=64a3c0a6
+2026-09-12 02:14:48,691 INFO [protocol.handler] 📤 Отправляю ACK на META для peer_id=64a3c0a6
+2026-09-12 02:14:54,815 INFO [app.bridge] ACCEPT transfer=58cd7331 peer=64a3c0a6
+2026-09-12 02:14:54,815 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=58cd7331 save_dir=C:/Users/junes/Desktop/learning_python
+2026-09-12 02:14:54,815 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 02:17:53,965 INFO [network.connection] Запуск TCP сервера на 0.0.0.0:65432 с лимитом 33554432 байт
+2026-09-12 02:17:57,725 INFO [network.connection] Подключился клиент: ('192.168.1.157', 47108)
+2026-09-12 02:17:57,725 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:17:57,725 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:17:57,725 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:17:57,834 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:17:57,834 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:18:05,524 INFO [network.connection] Подключился клиент: ('192.168.1.157', 47942)
+2026-09-12 02:18:05,525 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 02:18:05,526 INFO [network.connection] RECV type=META peer=64a3c0a6 from=192.168.1.157 size=285
+2026-09-12 02:18:05,526 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:18:05,526 INFO [protocol.handler] handle_message: type=META, peer=64a3c0a6, writer=есть
+2026-09-12 02:18:05,538 INFO [protocol.handler] ✅ Сохранен writer для peer_id=64a3c0a6
+2026-09-12 02:18:05,539 INFO [protocol.handler] 📤 Отправляю ACK на META для peer_id=64a3c0a6
+2026-09-12 02:18:05,616 INFO [network.connection] !!! ЗАРЕГИСТРИРОВАН PEER_ID: 64a3c0a631bb4ab49e26cdcda511a5ee для сокета от 192.168.1.157
+2026-09-12 02:18:05,616 INFO [network.connection] RECV type=FILE_CHUNK peer=64a3c0a6 from=192.168.1.157 size=37954
+2026-09-12 02:18:05,616 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:18:05,616 INFO [protocol.handler] handle_message: type=FILE_CHUNK, peer=64a3c0a6, writer=есть
+2026-09-12 02:18:05,616 INFO [protocol.handler] 📥 Получен FILE_CHUNK #0 от 64a3c0a6
+2026-09-12 02:18:05,617 INFO [protocol.handler] 📤 Отправляю ACK на FILE_CHUNK #0 для peer_id=64a3c0a6
+2026-09-12 02:18:11,154 INFO [app.bridge] ACCEPT transfer=7640f62e peer=64a3c0a6
+2026-09-12 02:18:11,154 INFO [app.bridge] RECV_START peer=64a3c0a6 transfer=7640f62e save_dir=C:/Users/junes/Desktop/learning_python
+2026-09-12 02:18:11,154 INFO [app.transfer] RECV_START file=README.md chunks=1 peer=64a3c0a6
+2026-09-12 02:18:11,167 INFO [app.transfer] RECV_DONE_OK file=README.md peer=64a3c0a6
+2026-09-12 02:18:11,167 INFO [app.bridge] RECV_DONE ok=True reason=C:/Users/junes/Desktop/learning_python\README.md
+2026-09-12 02:18:57,851 INFO [network.connection] Подключился клиент: ('192.168.1.157', 51698)
+2026-09-12 02:18:57,851 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:18:57,851 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:18:57,851 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:18:58,083 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:18:58,083 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)
+2026-09-12 02:19:58,087 INFO [network.connection] Подключился клиент: ('192.168.1.157', 36252)
+2026-09-12 02:19:58,087 INFO [network.connection] RECV type=HEARTBEAT peer=None from=192.168.1.157 size=105
+2026-09-12 02:19:58,087 INFO [network.connection] >>> ВХОД В handle_message...
+2026-09-12 02:19:58,087 INFO [protocol.handler] handle_message: type=HEARTBEAT, peer=64a3c0a6, writer=есть
+2026-09-12 02:19:58,113 INFO [network.connection] Соединение закрыто или пустые данные от 192.168.1.157
+2026-09-12 02:19:58,113 INFO [network.connection] Завершение обработчика соединения для 192.168.1.157 (peer_id: None)

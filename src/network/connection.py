@@ -1,7 +1,16 @@
-import asyncio
-import json
+import sys
+import os
+import asyncio 
 import logging
+import json
 
+# Добавляем папку 'src' в пути поиска Python, чтобы он увидел 'protocol'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, '..'))
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+# Теперь ваш импорт сработает:
 from protocol import messages as messages_mod
 from protocol.handler import handle_message
 
@@ -16,70 +25,76 @@ READER_LIMIT = 32 * 1024 * 1024
 
 
 async def start_tcp_server(port, app):
-
     host = app.config.host
+    logger.info(f"Запуск TCP сервера на {host}:{port} с лимитом {READER_LIMIT} байт")
 
     async def handler(reader, writer):
         addr = writer.get_extra_info("peername")
         sender_ip = addr[0] if addr else "unknown"
         peer_id = None
-        print(f"Подключился клиент: {addr}")
+        logger.info(f"Подключился клиент: {addr}")
 
         try:
             while True:
-                # Без таймаута: соединение должно жить, пока пир не закроет его
-                # сам. Таймаут в 10 сек убивал соединение во время ожидания
-                # решения пользователя (приём файла), а также канал подтверждений
-                # между передачами — следующая передача уходила в битый сокет.
+                # Без таймаута: соединение должно жить, пока пир не закроет его сам.
                 raw_message = await receive_message(reader, timeout=None)
                 if raw_message is None:
+                    logger.info(f"Соединение закрыто или пустые данные от {sender_ip}")
                     break
+                
+                logger.debug(f"ПОЛУЧЕНО СЫРОЕ СООБЩЕНИЕ длиной: {len(raw_message)} байт от {sender_ip}")
+
                 try:
                     parsed_message = app.parse_message(raw_message)
-                except Exception:
-                    logger.exception("Ошибка при парсинге сообщения")
-                    continue
+                except Exception as e:
+                    logger.error(f"КРИТИЧЕСКИЙ СБОЙ ПАРСИНГА от {sender_ip}: {e}", exc_info=True)
+                    continue  # Пропускаем битое сообщение, но держим соединение
+
                 if not isinstance(parsed_message, dict) or parsed_message.get("error"):
+                    logger.warning(f"Сообщение содержит ошибку или не является dict: {parsed_message}")
                     continue
+
                 msg_type = parsed_message.get("type")
-                # Подтверждения (META/FILE_CHUNK/DONE) шлём получателю обратно по
-                # этому же сокету, с которого пришли META/чанки. Обратный дозвон
-                # к отправителю (connect_to_peer) рвался фаерволом, и отправитель
-                # навсегда зависал на ожидании подтверждения. Heartbeat мы не
-                # учитываем: он приходит по отдельному временному сокету и
-                # перезаписал бы рабочий канал передачи. Рабочий канал хранится
-                # в app._incoming_connections (см. protocol/handler.py, META).
-                if msg_type in ("META", "FILE_CHUNK"):
-                    peer_id = parsed_message["peer_id"]
+                
+                # БЕЗОПАСНОЕ получение peer_id (избегаем KeyError)
+                if msg_type in ("META", "FILE_CHUNK", "HELLO", "HANDSHAKE"):
+                    peer_id = parsed_message.get("peer_id")
+                    logger.info(f"!!! ЗАРЕГИСТРИРОВАН PEER_ID: {peer_id} для сокета от {sender_ip}")
+
                 logger.info(
                     "RECV type=%s peer=%s from=%s size=%d",
                     msg_type,
-                    str(parsed_message.get("peer_id"))[:8],
+                    str(peer_id)[:8] if peer_id else "None",
                     sender_ip,
                     len(raw_message),
                 )
+
+                logger.info(">>> ВХОД В handle_message...")
                 try:
+                    # ВАЖНО: если handle_message синхронная и делает тяжелую I/O (запись на диск), 
+                    # это блокирует event loop! Убедитесь, что там используется aiofiles или asyncio.to_thread
                     handle_message(parsed_message, app, sender_ip=sender_ip, writer=writer)
-                except Exception:
-                    logger.exception("Ошибка при обработке сообщения")
+                except Exception as e:
+                    logger.error(f"Ошибка при обработке сообщения в handle_message: {e}", exc_info=True)
+                    # Не делаем break, чтобы не рвать соединение из-за одной ошибки чанка
+
                 if msg_type == "HEARTBEAT":
                     try:
-                        reply = messages_mod.create_message(
-                            "HEARTBEAT", app.my_peer_id
-                        )
+                        reply = messages_mod.create_message("HEARTBEAT", app.my_peer_id)
                         await send_message(writer, reply)
-                    except Exception:
+                    except Exception as e:
                         logger.exception("Ошибка при отправке ответа на heartbeat")
+                        
         finally:
+            logger.info(f"Завершение обработчика соединения для {sender_ip} (peer_id: {peer_id})")
             if peer_id and app._incoming_connections.get(peer_id) is writer:
                 app._incoming_connections.pop(peer_id, None)
+                logger.info(f"Удален peer_id {peer_id} из _incoming_connections")
+            
             writer.close()
             try:
                 await writer.wait_closed()
             except (ConnectionResetError, OSError):
-                # Пир оборвал сокет (WinError 64/10053/10054) — ждать закрытия
-                # уже не нужно, а непойманная ошибка засоряла лог как
-                # «Unhandled exception in event loop».
                 pass
 
     server = await asyncio.start_server(handler, host, port, limit=READER_LIMIT)
@@ -93,71 +108,82 @@ async def connect_to_peer(ip, port, force=False):
     async with _connection_lock:
         if not force and key in _connections:
             reader, writer = _connections[key]
-            # writer.is_closing() может оставаться False после закрытия пиром
-            # сокета — проверяем и транспорт, чтобы не переиспользовать битый.
             transport = getattr(writer, "transport", None)
             transport_closing = transport is not None and transport.is_closing()
             if not writer.is_closing() and not transport_closing:
+                logger.debug(f"Переиспользуем существующее соединение с {ip}:{port}")
                 return reader, writer
+            logger.warning(f"Соединение с {ip}:{port} закрыто, удаляем из кэша")
             del _connections[key]
+        
         try:
-            reader, writer = await asyncio.open_connection(
-                ip, port, limit=READER_LIMIT
-            )
-        except (ConnectionRefusedError, OSError):
+            logger.info(f"Попытка подключения к {ip}:{port}...")
+            reader, writer = await asyncio.open_connection(ip, port, limit=READER_LIMIT)
+            logger.info(f"Успешно подключено к {ip}:{port}")
+        except (ConnectionRefusedError, OSError) as e:
+            logger.error(f"Не удалось подключиться к {ip}:{port}: {e}")
             return None, None
+        
         _connections[key] = (reader, writer)
         return reader, writer
 
 
 async def read_outgoing_stream(reader, app, writer=None):
-    """Читает ответы пира на исходящем подключении (ACK/REJECT/ERROR/DONE).
-
-    Получатель отвечает на META/FILE_CHUNK/DONE по тому же сокету, через
-    который отправитель шлёт данные. Раньше получатель открывал встречное
-    подключение к отправителю — оно падало за NAT/файрволом, ACK не доходили
-    и передача зависала. Это слушает исходящий сокет и разбирает ответы."""
+    """Читает ответы пира на исходящем подключении (ACK/REJECT/ERROR/DONE)."""
     try:
         while True:
             raw_message = await receive_message(reader, timeout=None)
             if raw_message is None:
+                logger.info("Исходящий поток закрыт (raw_message is None)")
                 break
+            
+            logger.debug(f"ПОЛУЧЕН ОТВЕТ длиной: {len(raw_message)} байт")
+            
             try:
                 parsed_message = app.parse_message(raw_message)
-            except Exception:
-                logger.exception("Ошибка при парсинге сообщения")
+            except Exception as e:
+                logger.error(f"Ошибка при парсинге ответа: {e}", exc_info=True)
                 continue
+            
             if not isinstance(parsed_message, dict) or parsed_message.get("error"):
                 continue
+            
             logger.info(
                 "RECV_REPLY type=%s peer=%s size=%d",
                 parsed_message.get("type"),
-                str(parsed_message.get("peer_id"))[:8],
+                str(parsed_message.get("peer_id"))[:8] if parsed_message.get("peer_id") else "None",
                 len(raw_message),
             )
+            
             try:
                 handle_message(parsed_message, app, writer=writer)
-            except Exception:
-                logger.exception("Ошибка при обработке сообщения")
-    except (ConnectionResetError, BrokenPipeError, OSError):
-        pass
+            except Exception as e:
+                logger.error(f"Ошибка при обработке ответа: {e}", exc_info=True)
+                
+    except (ConnectionResetError, BrokenPipeError, OSError) as e:
+        logger.warning(f"Исходящий поток разорван: {e}")
 
 
 async def send_message(writer, message_json):
     try:
         if writer.is_closing():
+            logger.warning("Попытка отправки в закрывающийся сокет")
             return False
-        logger.debug("SEND type=%s peer=%s", message_json.get("type"), str(message_json.get("peer_id"))[:8])
+        
+        logger.debug("SEND type=%s peer=%s", message_json.get("type"), str(message_json.get("peer_id"))[:8] if message_json.get("peer_id") else "None")
         json_line = json.dumps(message_json, ensure_ascii=False)
         data = (json_line + "\n").encode("utf-8")
 
         writer.write(data)
-        await writer.drain()
-
+        logger.debug("Вызов await writer.drain()...")
+        await writer.drain()  # <-- Если передача застряла на 0%, зависание чаще всего происходит ЗДЕСЬ
+        logger.debug("SEND drain completed успешно")
         return True
-    except (ConnectionResetError, BrokenPipeError, OSError):
+        
+    except (ConnectionResetError, BrokenPipeError, OSError) as e:
+        logger.warning(f"Ошибка сети при отправке: {e}")
         return False
-    except Exception:
+    except Exception as e:
         logger.exception("Не удалось отправить сообщение")
         return False
 
@@ -169,16 +195,19 @@ async def receive_message(reader, timeout=10):
             return None
     except asyncio.TimeoutError:
         return None
-    except (ConnectionResetError, OSError):
+    except (ConnectionResetError, OSError) as e:
+        logger.debug(f"Сетевая ошибка при чтении: {e}")
         return None
-    except (ValueError, asyncio.LimitOverrunError):
-        # Строка длиннее лимита — соединение в неопределённом состоянии.
+    except (ValueError, asyncio.LimitOverrunError) as e:
+        logger.error(f"Превышен лимит чтения или ошибка значения: {e}")
         return None
 
     if not data:
         return None
     try:
         text = data.decode("utf-8")
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as e:
+        logger.error(f"Ошибка декодирования UTF-8: {e}")
         return None
+    
     return text.rstrip("\r\n")
